@@ -1,24 +1,25 @@
 import { Link } from "react-router-dom";
+import bg from "../assets/login-bg.png"; // 👈 your image
 
 function Login() {
   return (
-    <div className="min-h-screen flex">
+    <div
+      className="min-h-screen bg-cover bg-center flex items-center justify-end"
+      style={{ backgroundImage: `url(${bg})` }}
+    >
+      
+      {/* RIGHT SIDE CONTENT */}
+      <div className="w-full md:w-1/2 flex flex-col items-center justify-center pr-10">
 
-      {/* LEFT SIDE (Image / Branding) */}
-      <div className="hidden md:flex w-1/2 bg-gradient-to-br from-indigo-600 to-purple-700 text-white items-center justify-center p-10">
-        <div>
-          <h1 className="text-4xl font-bold mb-4">BizBuddies</h1>
-          <p className="text-lg opacity-90">
-            Connect, Sell, and Grow your campus business easily.
-          </p>
-        </div>
-      </div>
+        {/* Logo */}
+        <h1 className="text-5xl font-bold text-indigo-900 mb-8">
+          BizBuddies
+        </h1>
 
-      {/* RIGHT SIDE (Form) */}
-      <div className="flex w-full md:w-1/2 items-center justify-center bg-gray-100">
+        {/* Login Card */}
+        <div className="bg-white/30 backdrop-blur-lg p-8 rounded-2xl shadow-2xl w-96 border border-white/40">
 
-        <div className="bg-white p-8 rounded-2xl shadow-xl w-96">
-          <h2 className="text-2xl font-bold text-center mb-6">
+          <h2 className="text-2xl font-semibold text-center mb-6">
             Welcome Back 👋
           </h2>
 
@@ -26,18 +27,18 @@ function Login() {
             <input
               type="email"
               placeholder="Email"
-              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="w-full p-3 rounded-lg bg-white/70 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
             />
 
             <input
               type="password"
               placeholder="Password"
-              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="w-full p-3 rounded-lg bg-white/70 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
             />
 
             <button
               type="submit"
-              className="w-full bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 transition duration-300"
+              className="w-full bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 transition"
             >
               Login
             </button>
@@ -45,14 +46,13 @@ function Login() {
 
           <p className="text-center mt-4 text-sm">
             Don’t have an account?{" "}
-            <Link to="/signup" className="text-indigo-600 font-semibold">
+            <Link to="/signup" className="text-indigo-700 font-semibold">
               Signup
             </Link>
           </p>
         </div>
 
       </div>
-
     </div>
   );
 }
