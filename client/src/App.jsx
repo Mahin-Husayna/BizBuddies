@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import CreateBusiness from "./pages/CreateBusiness";
 import MyBusiness from "./pages/MyBusiness";
 import AddProduct from "./pages/AddProduct";
+import BusinessProfile from "./pages/BusinessProfile";
 
 function App() {
   return (
@@ -16,9 +17,11 @@ function App() {
         <Route path="/home" element={<Home />} />
 
 
+
       <Route path="/create-business" element={<CreateBusiness />} />
       <Route path="/my-business" element={<MyBusiness />} />
       <Route path="/add-product" element={<AddProduct />} />
+      <Route path="/business/:id" element={<BusinessProfile />} />
       </Routes>
     </Router>
   );

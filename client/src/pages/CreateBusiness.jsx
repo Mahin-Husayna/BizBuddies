@@ -23,12 +23,13 @@ function CreateBusiness() {
         description,
         category,
         owner: user.id,
+        ownerName: user.name, // ✅ FIXED
       }),
     });
 
     if (res.ok) {
       alert("Business created!");
-      navigate("/home");
+      navigate("/my-business");
     } else {
       alert("Error creating business");
     }
@@ -39,24 +40,20 @@ function CreateBusiness() {
       <h1 className="text-2xl font-bold mb-4">Create Business</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-
         <input
           placeholder="Business Name"
-          value={name}
           onChange={(e) => setName(e.target.value)}
           className="border p-2 w-full"
         />
 
         <input
           placeholder="Category"
-          value={category}
           onChange={(e) => setCategory(e.target.value)}
           className="border p-2 w-full"
         />
 
         <textarea
           placeholder="Description"
-          value={description}
           onChange={(e) => setDescription(e.target.value)}
           className="border p-2 w-full"
         />
@@ -64,7 +61,6 @@ function CreateBusiness() {
         <button className="bg-purple-500 text-white px-4 py-2 rounded">
           Create
         </button>
-
       </form>
     </div>
   );

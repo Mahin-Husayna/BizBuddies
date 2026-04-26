@@ -4,8 +4,6 @@ import { useNavigate } from "react-router-dom";
 function MyBusiness() {
   const [business, setBusiness] = useState(null);
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -13,52 +11,47 @@ function MyBusiness() {
 
     if (!user) return;
 
-    // 1️⃣ Fetch business
     fetch(`http://localhost:5000/api/business/${user.id}`)
-      .then((res) => res.json())
-      .then((data) => {
+      .then(res => res.json())
+      .then(data => {
         setBusiness(data);
 
-        // 2️⃣ Fetch products for that business
         return fetch(
           `http://localhost:5000/api/products/business/${data._id}`
         );
       })
-      .then((res) => res.json())
-      .then((productsData) => {
-        setProducts(productsData);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
+      .then(res => res.json())
+      .then(productsData => setProducts(productsData))
+      .catch(err => console.error(err));
   }, []);
 
-  // DELETE FUNCTION
-  const handleDelete = async (id) => {
-    const confirmDelete = window.confirm("Delete this product?");
+  // 🗑️ DELETE BUSINESS FUNCTION
+  const handleDeleteBusiness = async () => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete your business?"
+    );
+
     if (!confirmDelete) return;
 
     try {
-      await fetch(`http://localhost:5000/api/products/${id}`, {
-        method: "DELETE",
-      });
+      await fetch(
+        `http://localhost:5000/api/business/${business._id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
-      // Remove from UI instantly
-      setProducts(products.filter((p) => p._id !== id));
+      alert("Business deleted successfully");
+
+      // redirect to homepage
+      navigate("/home");
     } catch (error) {
-      console.error("Delete error:", error);
+      console.error(error);
+      alert("Error deleting business");
     }
   };
 
-  if (loading) {
-    return <div className="p-10">Loading...</div>;
-  }
-
-  if (!business) {
-    return <div className="p-10">No business found</div>;
-  }
+  if (!business) return <div className="p-10">Loading...</div>;
 
   return (
     <div className="p-10">
@@ -76,13 +69,28 @@ function MyBusiness() {
         Category: {business.category}
       </p>
 
-      {/* ADD PRODUCT */}
-      <button
-        onClick={() => navigate("/add-product")}
-        className="mt-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-5 py-2 rounded-lg"
-      >
-        + Add Product
-      </button>
+      <p className="text-gray-700 text-sm mt-2 font-medium">
+        👤 Owner: {business.ownerName}
+      </p>
+
+      {/* ACTION BUTTONS */}
+      <div className="flex gap-4 mt-6">
+
+        <button
+          onClick={() => navigate("/add-product")}
+          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-5 py-2 rounded-lg"
+        >
+          + Add Product
+        </button>
+
+        <button
+          onClick={handleDeleteBusiness}
+          className="bg-red-500 text-white px-5 py-2 rounded-lg hover:bg-red-600"
+        >
+          Delete Business
+        </button>
+
+      </div>
 
       {/* PRODUCTS */}
       <div className="mt-10">
@@ -91,33 +99,24 @@ function MyBusiness() {
         </h2>
 
         {products.length === 0 ? (
-          <p className="text-gray-500">No products yet</p>
+          <p>No products yet</p>
         ) : (
           <div className="grid grid-cols-3 gap-4">
-            {products.map((product) => (
+            {products.map(product => (
               <div
                 key={product._id}
-                className="bg-white p-4 rounded-xl shadow relative"
+                className="bg-white p-4 rounded-xl shadow"
               >
-                {/* DELETE BUTTON */}
-                <button
-                  onClick={() => handleDelete(product._id)}
-                  className="absolute top-2 right-2 text-red-500 text-sm"
-                >
-                  ❌
-                </button>
-
                 <img
                   src={product.image}
-                  alt={product.name}
-                  className="w-full h-28 object-cover rounded-lg mb-3"
+                  className="w-full h-28 object-cover rounded mb-2"
                 />
 
                 <h3 className="font-semibold text-sm">
                   {product.name}
                 </h3>
 
-                <p className="text-purple-600 font-bold mt-1">
+                <p className="text-purple-600">
                   ৳{product.price}
                 </p>
               </div>

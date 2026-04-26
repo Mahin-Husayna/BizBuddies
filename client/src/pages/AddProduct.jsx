@@ -35,7 +35,7 @@ function AddProduct() {
 
     if (res.ok) {
       alert("Product added!");
-      navigate("/my-business");
+      navigate("/home");
     } else {
       alert("Error adding product");
     }

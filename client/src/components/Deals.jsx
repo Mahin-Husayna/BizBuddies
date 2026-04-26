@@ -1,24 +1,16 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 function Deals() {
-  const deals = [
-    {
-      name: "Custom T-Shirts",
-      seller: "EcoThreads",
-      price: "৳250",
-      image: "https://via.placeholder.com/150",
-    },
-    {
-      name: "Coffee Combo",
-      seller: "Brewed Awakenings",
-      price: "৳180",
-      image: "https://via.placeholder.com/150",
-    },
-    {
-      name: "Notebook Pack",
-      seller: "PrintHub",
-      price: "৳120",
-      image: "https://via.placeholder.com/150",
-    },
-  ];
+  const [products, setProducts] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/products")
+      .then((res) => res.json())
+      .then((data) => setProducts(data))
+      .catch((err) => console.error(err));
+  }, []);
 
   return (
     <div className="mt-6">
@@ -26,24 +18,48 @@ function Deals() {
         Recent Deals
       </h2>
 
-      <div className="grid grid-cols-3 gap-4">
-        {deals.map((deal, index) => (
-          <div
-            key={index}
-            className="bg-white/70 backdrop-blur-lg p-4 rounded-xl shadow"
-          >
-            <img
-              src={deal.image}
-              alt={deal.name}
-              className="w-full h-28 object-cover rounded-lg mb-3"
-            />
+      {products.length === 0 ? (
+        <p className="text-gray-500">No products available</p>
+      ) : (
+        <div className="grid grid-cols-3 gap-4">
+          {products.map((product) => (
+            <div
+              key={product._id}
+              className="bg-white/70 backdrop-blur-lg p-4 rounded-xl shadow hover:shadow-lg transition"
+            >
+              <img
+                src={product.image || "https://via.placeholder.com/150"}
+                alt={product.name}
+                className="w-full h-28 object-cover rounded-lg mb-3"
+              />
 
-            <h3 className="font-semibold text-sm">{deal.name}</h3>
-            <p className="text-xs text-gray-600">{deal.seller}</p>
-            <p className="text-purple-600 font-bold mt-1">{deal.price}</p>
-          </div>
-        ))}
-      </div>
+              <h3 className="font-semibold text-sm">
+                {product.name}
+              </h3>
+
+              {/* 🔥 CLICKABLE SELLER */}
+              <p
+                
+                onClick={() => {
+  const businessId =
+    typeof product.business === "object"
+      ? product.business._id
+      : product.business;
+
+  navigate(`/business/${businessId}`);
+}}
+                className="text-xs text-gray-600 cursor-pointer hover:underline"
+              >
+                {product.seller}
+              </p>
+
+              <p className="text-purple-600 font-bold mt-1">
+                ৳{product.price}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
