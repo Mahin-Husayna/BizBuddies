@@ -1,130 +1,160 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+
+import Sidebar from "../components/Sidebar";
+import Navbar from "../components/Navbar";
 
 function MyBusiness() {
   const [business, setBusiness] = useState(null);
   const [products, setProducts] = useState([]);
+
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
 
+  // FETCH DATA
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-
     if (!user) return;
 
     fetch(`http://localhost:5000/api/business/${user.id}`)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         setBusiness(data);
-
         return fetch(
           `http://localhost:5000/api/products/business/${data._id}`
         );
       })
-      .then(res => res.json())
-      .then(productsData => setProducts(productsData))
-      .catch(err => console.error(err));
+      .then((res) => res.json())
+      .then((data) => setProducts(data))
+      .catch(() => toast.error("Failed to load data"));
   }, []);
 
-  // 🗑️ DELETE BUSINESS FUNCTION
+  // DELETE BUSINESS
   const handleDeleteBusiness = async () => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete your business?"
     );
-
     if (!confirmDelete) return;
 
-    try {
-      await fetch(
-        `http://localhost:5000/api/business/${business._id}`,
-        {
-          method: "DELETE",
-        }
-      );
+    await fetch(
+      `http://localhost:5000/api/business/${business._id}`,
+      { method: "DELETE" }
+    );
 
-      alert("Business deleted successfully");
-
-      // redirect to homepage
-      navigate("/home");
-    } catch (error) {
-      console.error(error);
-      alert("Error deleting business");
-    }
+    toast.success("Business deleted");
+    navigate("/home");
   };
 
-  if (!business) return <div className="p-10">Loading...</div>;
+  // DELETE PRODUCT
+  const handleDeleteProduct = async (id) => {
+    await fetch(`http://localhost:5000/api/products/${id}`, {
+      method: "DELETE",
+    });
+
+    setProducts(products.filter((p) => p._id !== id));
+    toast.success("Product deleted");
+  };
+
+  // EDIT PRODUCT
+  const handleEditProduct = (product) => {
+    navigate(`/edit-product/${product._id}`, { state: product });
+  };
+
+  if (!business) return <div>Loading...</div>;
 
   return (
-    <div className="p-10">
+    <div className="min-h-screen p-4 bg-gradient-to-br from-purple-200 via-blue-200 to-pink-200">
+      <div className="flex gap-4 items-start">
 
-      {/* BUSINESS INFO */}
-      <h1 className="text-3xl font-bold text-purple-700">
-        {business.name}
-      </h1>
+        <Sidebar />
 
-      <p className="text-gray-600 mt-2">
-        {business.description}
-      </p>
+        <div className="flex-1 bg-white/40 p-6 rounded-2xl">
 
-      <p className="text-sm mt-2 text-gray-500">
-        Category: {business.category}
-      </p>
+          <Navbar user={user} />
 
-      <p className="text-gray-700 text-sm mt-2 font-medium">
-        👤 Owner: {business.ownerName}
-      </p>
+          {/* BUSINESS INFO */}
+          <h1 className="text-2xl font-bold text-purple-700">
+            {business.name}
+          </h1>
 
-      {/* ACTION BUTTONS */}
-      <div className="flex gap-4 mt-6">
+          <p className="mt-2 text-gray-700">{business.description}</p>
 
-        <button
-          onClick={() => navigate("/add-product")}
-          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-5 py-2 rounded-lg"
-        >
-          + Add Product
-        </button>
+          <p className="text-sm text-gray-500">
+            Category: {business.category}
+          </p>
 
-        <button
-          onClick={handleDeleteBusiness}
-          className="bg-red-500 text-white px-5 py-2 rounded-lg hover:bg-red-600"
-        >
-          Delete Business
-        </button>
+          <p className="text-sm mt-1">
+            👤 Owner: {business.ownerName}
+          </p>
 
-      </div>
+          {/* ACTIONS */}
+          <div className="flex gap-4 mt-6">
 
-      {/* PRODUCTS */}
-      <div className="mt-10">
-        <h2 className="text-xl font-semibold mb-4">
-          Your Products
-        </h2>
+            <button
+              onClick={() => navigate("/add-product")}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg"
+            >
+              + Add Product
+            </button>
 
-        {products.length === 0 ? (
-          <p>No products yet</p>
-        ) : (
+            <button
+              onClick={handleDeleteBusiness}
+              className="bg-red-500 text-white px-4 py-2 rounded-lg"
+            >
+              Delete Business
+            </button>
+
+          </div>
+
+          {/* PRODUCTS */}
+          <h2 className="text-lg font-semibold mt-8 mb-4">
+            Your Products
+          </h2>
+
           <div className="grid grid-cols-3 gap-4">
-            {products.map(product => (
+
+            {products.map((p) => (
               <div
-                key={product._id}
-                className="bg-white p-4 rounded-xl shadow"
+                key={p._id}
+                className="relative bg-white p-4 rounded-xl shadow group"
               >
+
+                {/* DELETE ICON */}
+                <button
+                  onClick={() => {
+                    const confirmDelete = window.confirm("Are you sure?");
+                    if (confirmDelete) handleDeleteProduct(p._id);
+                  }}
+                  className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white w-6 h-6 flex items-center justify-center rounded-full text-xs opacity-0 group-hover:opacity-100 transition"
+                >
+                  ✕
+                </button>
+
+                {/* EDIT ICON */}
+                <button
+                  onClick={() => handleEditProduct(p)}
+                  className="absolute top-2 right-10 bg-blue-500 hover:bg-blue-600 text-white w-6 h-6 flex items-center justify-center rounded-full text-xs opacity-0 group-hover:opacity-100 transition"
+                >
+                  ✎
+                </button>
+
                 <img
-                  src={product.image}
-                  className="w-full h-28 object-cover rounded mb-2"
+                  src={p.image}
+                  className="w-full h-24 object-cover rounded mb-2"
                 />
 
-                <h3 className="font-semibold text-sm">
-                  {product.name}
-                </h3>
+                <h3 className="font-medium">{p.name}</h3>
 
-                <p className="text-purple-600">
-                  ৳{product.price}
-                </p>
+                <p className="text-purple-600">৳{p.price}</p>
+
               </div>
             ))}
-          </div>
-        )}
-      </div>
 
+          </div>
+
+        </div>
+
+      </div>
     </div>
   );
 }

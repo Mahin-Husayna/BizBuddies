@@ -7,6 +7,9 @@ import CreateBusiness from "./pages/CreateBusiness";
 import MyBusiness from "./pages/MyBusiness";
 import AddProduct from "./pages/AddProduct";
 import BusinessProfile from "./pages/BusinessProfile";
+import Search from "./pages/Search";
+import EditProduct from "./pages/EditProduct";
+
 
 function App() {
   return (
@@ -22,6 +25,8 @@ function App() {
       <Route path="/my-business" element={<MyBusiness />} />
       <Route path="/add-product" element={<AddProduct />} />
       <Route path="/business/:id" element={<BusinessProfile />} />
+      <Route path="/search" element={<Search />} />
+      <Route path="/edit-product/:id" element={<EditProduct />} />
       </Routes>
     </Router>
   );

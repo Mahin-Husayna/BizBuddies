@@ -23,6 +23,9 @@ app.use("/api/business", businessRoutes);
 
 const productRoutes = require("./routes/productRoutes");
 app.use("/api/products", productRoutes);
+
+const searchRoutes = require("./routes/searchRoutes");
+app.use("/api/search", searchRoutes);
 // Test route
 app.get("/", (req, res) => {
   res.send("BizBuddies API running...");

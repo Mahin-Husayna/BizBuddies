@@ -8,3 +8,13 @@ createRoot(document.getElementById('root')).render(
     <App />
   </StrictMode>,
 )
+import { Toaster } from "react-hot-toast";
+
+function AppWrapper() {
+  return (
+    <>
+      <App />
+      <Toaster position="top-right" />
+    </>
+  );
+}
