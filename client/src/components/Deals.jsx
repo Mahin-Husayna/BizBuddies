@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Deals() {
   const [products, setProducts] = useState([]);
+  const scrollRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -12,20 +13,68 @@ function Deals() {
       .catch((err) => console.error(err));
   }, []);
 
-  return (
-    <div className="mt-6">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">
-        Recent Deals
-      </h2>
+  // 🔁 Scroll functions
+  const scrollLeft = () => {
+    scrollRef.current?.scrollBy({ left: -300, behavior: "smooth" });
+  };
 
-      {products.length === 0 ? (
-        <p className="text-gray-500">No products available</p>
-      ) : (
-        <div className="grid grid-cols-3 gap-4">
+  const scrollRight = () => {
+    scrollRef.current?.scrollBy({ left: 300, behavior: "smooth" });
+  };
+
+  // 🔗 Navigate safely
+  const openBusiness = (product) => {
+    if (!product.business) return;
+
+    const businessId =
+      typeof product.business === "object"
+        ? product.business._id
+        : product.business;
+
+    if (!businessId) return;
+
+    navigate(`/business/${businessId}`);
+  };
+
+  return (
+    <div className="mt-8">
+
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold text-gray-800">
+          Recent Deals
+        </h2>
+
+        {/* ARROWS */}
+        <div className="flex gap-2">
+          <button
+            onClick={scrollLeft}
+            className="bg-white/70 px-3 py-1 rounded-lg shadow hover:scale-105 transition"
+          >
+            ◀
+          </button>
+
+          <button
+            onClick={scrollRight}
+            className="bg-white/70 px-3 py-1 rounded-lg shadow hover:scale-105 transition"
+          >
+            ▶
+          </button>
+        </div>
+      </div>
+
+      {/* CENTER WRAPPER (IMPORTANT FOR WIDTH CONTROL) */}
+      <div className="flex justify-center">
+
+        {/* SCROLL CONTAINER */}
+        <div
+          ref={scrollRef}
+          className="flex gap-4 overflow-x-auto scrollbar-hide max-w-[750px] pb-2"
+        >
           {products.map((product) => (
             <div
               key={product._id}
-              className="bg-white/70 backdrop-blur-lg p-4 rounded-xl shadow hover:shadow-lg transition"
+              className="min-w-[230px] max-w-[230px] bg-white/70 backdrop-blur-lg p-4 rounded-xl shadow hover:shadow-lg transition"
             >
               <img
                 src={product.image || "https://via.placeholder.com/150"}
@@ -37,18 +86,10 @@ function Deals() {
                 {product.name}
               </h3>
 
-              {/* 🔥 CLICKABLE SELLER */}
+              {/* SELLER CLICK */}
               <p
-                
-                onClick={() => {
-  const businessId =
-    typeof product.business === "object"
-      ? product.business._id
-      : product.business;
-
-  navigate(`/business/${businessId}`);
-}}
-                className="text-xs text-gray-600 cursor-pointer hover:underline"
+                onClick={() => openBusiness(product)}
+                className="text-xs text-gray-500 cursor-pointer hover:underline"
               >
                 {product.seller}
               </p>
@@ -59,7 +100,8 @@ function Deals() {
             </div>
           ))}
         </div>
-      )}
+
+      </div>
     </div>
   );
 }
