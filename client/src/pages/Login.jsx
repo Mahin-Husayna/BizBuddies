@@ -9,30 +9,34 @@ function Login() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+  try {
+    const res = await fetch("http://localhost:5000/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (res.ok) {
-        alert("Login successful");
-        navigate("/home");
-      } else {
-        alert(data.message);
-      }
-    } catch (err) {
-      console.log(err);
-      alert("Something went wrong");
+    console.log("RESPONSE:", data); // ✅ debug
+
+    if (res.ok) {
+      localStorage.setItem("user", JSON.stringify(data.user)); // ✅ important
+      alert("Login successful");
+      navigate("/home");
+    } else {
+      alert(data.message || "Login failed");
     }
-  };
+
+  } catch (err) {
+    console.error("LOGIN ERROR:", err); // ✅ better debug
+    alert("Something went wrong");
+  }
+};
 
   return (
     <div
