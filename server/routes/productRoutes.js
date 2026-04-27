@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
+const upload = require("../config/upload");
 const {
   createProduct,
   getProducts,
@@ -8,16 +9,11 @@ const {
   deleteProduct,
 } = require("../controllers/productController");
 
-// CREATE
-router.post("/", createProduct);
+// ✅ MUST HAVE THIS
+router.post("/", upload.single("image"), createProduct);
 
-// GET ALL
 router.get("/", getProducts);
-
-// GET BY BUSINESS
 router.get("/business/:businessId", getProductsByBusiness);
-
-// DELETE
 router.delete("/:id", deleteProduct);
 
 module.exports = router;

@@ -1,35 +1,29 @@
 const express = require("express");
 const router = express.Router();
 
-const Business = require("../models/Business");
+const upload = require("../config/upload");
 
 const {
   createBusiness,
-  getMyBusiness,
   getAllBusinesses,
+  getBusinessByUser,
+  getBusinessById,
   deleteBusiness,
 } = require("../controllers/businessController");
 
 // CREATE
-router.post("/", createBusiness);
+router.post("/", upload.single("coverImage"), createBusiness);
 
-// GET SINGLE BUSINESS
-router.get("/single/:id", async (req, res) => {
-  try {
-    const business = await Business.findById(req.params.id);
-    res.json(business);
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching business" });
-  }
-});
-
-// GET ALL
+// GET ALL (homepage)
 router.get("/", getAllBusinesses);
 
-// GET MY BUSINESS
-router.get("/:userId", getMyBusiness);
+// GET ONE
+router.get("/single/:id", getBusinessById);
 
-// DELETE BUSINESS
+// GET USER BUSINESS
+router.get("/:userId", getBusinessByUser);
+
+// DELETE
 router.delete("/:id", deleteBusiness);
 
 module.exports = router;

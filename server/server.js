@@ -26,6 +26,14 @@ app.use("/api/products", productRoutes);
 
 const searchRoutes = require("./routes/searchRoutes");
 app.use("/api/search", searchRoutes);
+
+const announcementRoutes = require("./routes/announcementRoutes");
+app.use("/api/announcements", announcementRoutes);
+
+app.use("/uploads", express.static("uploads"));
+
+
+
 // Test route
 app.get("/", (req, res) => {
   res.send("BizBuddies API running...");

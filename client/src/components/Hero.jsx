@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import bg from "../assets/brac-bg.png"; // 👈 replace with your image
+import bg from "../assets/bracu-bg.png";
 
 function Hero() {
   const navigate = useNavigate();

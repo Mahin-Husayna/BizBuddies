@@ -4,12 +4,34 @@ const businessSchema = new mongoose.Schema({
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
+    required: true,
   },
-  name: String,
-  description: String,
-  category: String,
-  image: String, // optional image URL
-  ownerName: String,
+
+  ownerName: {
+    type: String,
+    default: "Unknown", // ✅ prevents crash
+  },
+
+  name: {
+    type: String,
+    required: true,
+  },
+
+  description: {
+    type: String,
+    default: "",
+  },
+
+  category: {
+    type: String,
+    default: "",
+  },
+
+  coverImage: {
+    type: String,
+    default: "",
+  },
+
   createdAt: {
     type: Date,
     default: Date.now,

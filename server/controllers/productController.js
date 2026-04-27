@@ -1,9 +1,20 @@
 const Product = require("../models/Product");
 
-// Create product
+// CREATE PRODUCT (WITH IMAGE UPLOAD)
 exports.createProduct = async (req, res) => {
   try {
-    const { name, price, image, seller, business, description, type } = req.body;
+    const {
+      name,
+      price,
+      business,
+      seller,
+      description,
+      type,
+    } = req.body;
+
+    const image = req.file
+      ? `http://localhost:5000/uploads/${req.file.filename}`
+      : "";
 
     const product = new Product({
       name,
@@ -19,6 +30,7 @@ exports.createProduct = async (req, res) => {
 
     res.status(201).json(product);
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       message: "Error creating product",
       error,
@@ -26,7 +38,7 @@ exports.createProduct = async (req, res) => {
   }
 };
 
-// Get all products
+// GET ALL PRODUCTS
 exports.getProducts = async (req, res) => {
   try {
     const products = await Product.find()
@@ -42,14 +54,14 @@ exports.getProducts = async (req, res) => {
   }
 };
 
-// Get products by business
+// GET PRODUCTS BY BUSINESS
 exports.getProductsByBusiness = async (req, res) => {
   try {
     const { businessId } = req.params;
 
-    const products = await Product.find({ business: businessId }).sort({
-      createdAt: -1,
-    });
+    const products = await Product.find({
+      business: businessId,
+    }).sort({ createdAt: -1 });
 
     res.status(200).json(products);
   } catch (error) {
@@ -59,6 +71,7 @@ exports.getProductsByBusiness = async (req, res) => {
     });
   }
 };
+
 // DELETE PRODUCT
 exports.deleteProduct = async (req, res) => {
   try {
@@ -69,6 +82,8 @@ exports.deleteProduct = async (req, res) => {
     res.json({ message: "Product deleted" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error deleting product" });
+    res.status(500).json({
+      message: "Error deleting product",
+    });
   }
 };

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import bg from "../assets/brac-bg.png"; // 🔁 CHANGE IMAGE HERE
+import bg from "../assets/brac-bg.png"; 
 
 function Login() {
   const [email, setEmail] = useState("");
