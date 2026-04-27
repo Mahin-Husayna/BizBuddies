@@ -1,16 +1,42 @@
 const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema({
+  name: String,
+  price: Number,
+
+  discount: {
+    type: Number,
+    default: 0,
+  },
+
+  discountedPrice: {
+    type: Number,
+    default: 0,
+  },
+
+  offerEndsAt: {
+    type: Date,
+    default: null,
+  },
+
+  image: String,
+  seller: String,
+
   business: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Business",
-    required: true,
   },
-  name: String,
-  price: Number,
-  image: String,
-  seller: String,
-  description: String,
+
+  description: {
+    type: String,
+    default: "",
+  },
+
+  type: {
+    type: String,
+    default: "product",
+  },
+
   createdAt: {
     type: Date,
     default: Date.now,

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
@@ -8,13 +8,14 @@ import Navbar from "../components/Navbar";
 function AddProduct() {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
+  const [discount, setDiscount] = useState("");
+  const [offerEndsAt, setOfferEndsAt] = useState("");
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
 
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // IMAGE PREVIEW
   const handleImageChange = (file) => {
     setImage(file);
     setPreview(URL.createObjectURL(file));
@@ -24,18 +25,28 @@ function AddProduct() {
     e.preventDefault();
 
     try {
-      // get business
       const resBusiness = await fetch(
         `http://localhost:5000/api/business/${user.id}`
       );
+
       const business = await resBusiness.json();
+
+      if (!business || !business._id) {
+        toast.error("No business found. Create a business first.");
+        return;
+      }
 
       const formData = new FormData();
       formData.append("name", name);
       formData.append("price", price);
-      formData.append("image", image);
+      formData.append("discount", discount || 0);
+      formData.append("offerEndsAt", offerEndsAt || "");
       formData.append("seller", business.name);
       formData.append("business", business._id);
+
+      if (image) {
+        formData.append("image", image);
+      }
 
       const res = await fetch("http://localhost:5000/api/products", {
         method: "POST",
@@ -43,85 +54,95 @@ function AddProduct() {
       });
 
       if (res.ok) {
-        toast.success("Product added successfully 🚀");
+        toast.success("Product added successfully!");
         navigate("/my-business");
       } else {
-        toast.error("Failed to add product");
+        toast.error("Error adding product");
       }
     } catch (error) {
       console.error(error);
-      toast.error("Something went wrong");
+      toast.error("Server error");
     }
   };
 
   return (
     <div className="min-h-screen p-4 bg-gradient-to-br from-purple-200 via-blue-200 to-pink-200">
-
       <div className="flex gap-4 items-start">
-
         <Sidebar />
 
-        <div className="flex-1 bg-white/40 p-6 rounded-2xl">
-
+        <div className="flex-1 bg-white/40 backdrop-blur-xl p-6 rounded-2xl">
           <Navbar user={user} />
 
-          <h1 className="text-2xl font-bold mb-6 text-purple-700">
+          <h1 className="text-2xl font-bold text-purple-700 mb-6">
             Add Product
           </h1>
 
           <form
             onSubmit={handleSubmit}
-            className="bg-white p-6 rounded-xl shadow flex flex-col gap-4 max-w-md"
+            className="bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow max-w-lg flex flex-col gap-4"
           >
-
-            {/* NAME */}
             <input
+              type="text"
               placeholder="Product Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="border p-3 rounded"
+              className="border p-3 rounded-lg outline-none focus:ring-2 focus:ring-purple-400"
               required
             />
 
-            {/* PRICE */}
             <input
-              placeholder="Price"
               type="number"
+              placeholder="Price"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              className="border p-3 rounded"
+              className="border p-3 rounded-lg outline-none focus:ring-2 focus:ring-purple-400"
               required
             />
 
-            {/* IMAGE UPLOAD */}
+            <input
+              type="number"
+              placeholder="Discount % (optional)"
+              value={discount}
+              onChange={(e) => setDiscount(e.target.value)}
+              className="border p-3 rounded-lg outline-none focus:ring-2 focus:ring-purple-400"
+            />
+
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">
+                Limited-time offer ends at (optional)
+              </label>
+              <input
+                type="datetime-local"
+                value={offerEndsAt}
+                onChange={(e) => setOfferEndsAt(e.target.value)}
+                className="border p-3 rounded-lg outline-none focus:ring-2 focus:ring-purple-400 w-full"
+              />
+            </div>
+
             <input
               type="file"
               accept="image/*"
               onChange={(e) => handleImageChange(e.target.files[0])}
-              className="border p-2 rounded"
-              required
+              className="border p-2 rounded-lg"
             />
 
-            {/* IMAGE PREVIEW */}
             {preview && (
               <img
                 src={preview}
                 alt="preview"
-                className="w-full h-40 object-cover rounded"
+                className="w-full h-40 object-cover rounded-lg"
               />
             )}
 
-            {/* BUTTON */}
-            <button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 rounded-lg hover:scale-105 transition">
+            <button
+              type="submit"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-semibold hover:scale-105 transition"
+            >
               Add Product
             </button>
-
           </form>
-
         </div>
-
       </div>
-
     </div>
   );
 }

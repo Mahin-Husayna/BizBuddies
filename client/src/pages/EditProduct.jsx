@@ -9,25 +9,37 @@ function EditProduct() {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const user = JSON.parse(localStorage.getItem("user"));
+
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
+  const [discount, setDiscount] = useState("");
+  const [offerEndsAt, setOfferEndsAt] = useState("");
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState("");
 
-  const user = JSON.parse(localStorage.getItem("user"));
-
-  // FETCH PRODUCT
   useEffect(() => {
-    fetch(`http://localhost:5000/api/products`)
-      .then(res => res.json())
-      .then(data => {
-        const product = data.find(p => p._id === id);
+    fetch("http://localhost:5000/api/products")
+      .then((res) => res.json())
+      .then((data) => {
+        const product = data.find((p) => p._id === id);
+
         if (product) {
-          setName(product.name);
-          setPrice(product.price);
-          setPreview(product.image);
+          setName(product.name || "");
+          setPrice(product.price || "");
+          setDiscount(product.discount || "");
+          setPreview(product.image || "");
+
+          if (product.offerEndsAt) {
+            const formattedDate = new Date(product.offerEndsAt)
+              .toISOString()
+              .slice(0, 16);
+
+            setOfferEndsAt(formattedDate);
+          }
         }
-      });
+      })
+      .catch((err) => console.error(err));
   }, [id]);
 
   const handleImageChange = (file) => {
@@ -42,40 +54,36 @@ function EditProduct() {
       const formData = new FormData();
       formData.append("name", name);
       formData.append("price", price);
+      formData.append("discount", discount || 0);
+      formData.append("offerEndsAt", offerEndsAt || "");
 
       if (image) {
         formData.append("image", image);
       }
 
-      const res = await fetch(
-        `http://localhost:5000/api/products/${id}`,
-        {
-          method: "PUT",
-          body: formData,
-        }
-      );
+      const res = await fetch(`http://localhost:5000/api/products/${id}`, {
+        method: "PUT",
+        body: formData,
+      });
 
       if (res.ok) {
-        toast.success("Product updated ✨");
+        toast.success("Product updated successfully!");
         navigate("/my-business");
       } else {
         toast.error("Update failed");
       }
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
       toast.error("Server error");
     }
   };
 
   return (
     <div className="min-h-screen p-4 bg-gradient-to-br from-purple-200 via-blue-200 to-pink-200">
-
-      <div className="flex gap-4">
-
+      <div className="flex gap-4 items-start">
         <Sidebar />
 
         <div className="flex-1 bg-white/40 backdrop-blur-xl p-6 rounded-2xl">
-
           <Navbar user={user} />
 
           <h1 className="text-2xl font-bold text-purple-700 mb-6">
@@ -86,25 +94,41 @@ function EditProduct() {
             onSubmit={handleSubmit}
             className="bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow max-w-lg flex flex-col gap-4"
           >
-
-            {/* NAME */}
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="border p-3 rounded-lg focus:ring-2 focus:ring-purple-400 outline-none"
+              className="border p-3 rounded-lg outline-none focus:ring-2 focus:ring-purple-400"
               required
             />
 
-            {/* PRICE */}
             <input
               type="number"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              className="border p-3 rounded-lg focus:ring-2 focus:ring-purple-400 outline-none"
+              className="border p-3 rounded-lg outline-none focus:ring-2 focus:ring-purple-400"
               required
             />
 
-            {/* IMAGE UPLOAD */}
+            <input
+              type="number"
+              placeholder="Discount % (optional)"
+              value={discount}
+              onChange={(e) => setDiscount(e.target.value)}
+              className="border p-3 rounded-lg outline-none focus:ring-2 focus:ring-purple-400"
+            />
+
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">
+                Limited-time offer ends at (optional)
+              </label>
+              <input
+                type="datetime-local"
+                value={offerEndsAt}
+                onChange={(e) => setOfferEndsAt(e.target.value)}
+                className="border p-3 rounded-lg outline-none focus:ring-2 focus:ring-purple-400 w-full"
+              />
+            </div>
+
             <input
               type="file"
               accept="image/*"
@@ -112,7 +136,6 @@ function EditProduct() {
               className="border p-2 rounded-lg"
             />
 
-            {/* PREVIEW */}
             {preview && (
               <img
                 src={preview}
@@ -121,20 +144,15 @@ function EditProduct() {
               />
             )}
 
-            {/* BUTTON */}
             <button
               type="submit"
               className="bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-semibold hover:scale-105 transition"
             >
               Update Product
             </button>
-
           </form>
-
         </div>
-
       </div>
-
     </div>
   );
 }

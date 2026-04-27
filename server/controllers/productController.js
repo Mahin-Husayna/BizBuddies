@@ -1,6 +1,6 @@
 const Product = require("../models/Product");
 
-// CREATE PRODUCT (WITH IMAGE UPLOAD)
+// CREATE PRODUCT
 exports.createProduct = async (req, res) => {
   try {
     const {
@@ -10,7 +10,18 @@ exports.createProduct = async (req, res) => {
       seller,
       description,
       type,
+      discount,
+      offerEndsAt,
     } = req.body;
+
+    const numericPrice = Number(price);
+    const numericDiscount = Number(discount) || 0;
+
+    let discountedPrice = numericPrice;
+
+    if (numericDiscount > 0) {
+      discountedPrice = numericPrice - (numericPrice * numericDiscount) / 100;
+    }
 
     const image = req.file
       ? `http://localhost:5000/uploads/${req.file.filename}`
@@ -18,7 +29,10 @@ exports.createProduct = async (req, res) => {
 
     const product = new Product({
       name,
-      price,
+      price: numericPrice,
+      discount: numericDiscount,
+      discountedPrice,
+      offerEndsAt: offerEndsAt || null,
       image,
       seller,
       business,
@@ -59,9 +73,9 @@ exports.getProductsByBusiness = async (req, res) => {
   try {
     const { businessId } = req.params;
 
-    const products = await Product.find({
-      business: businessId,
-    }).sort({ createdAt: -1 });
+    const products = await Product.find({ business: businessId }).sort({
+      createdAt: -1,
+    });
 
     res.status(200).json(products);
   } catch (error) {
@@ -69,6 +83,54 @@ exports.getProductsByBusiness = async (req, res) => {
       message: "Error fetching business products",
       error,
     });
+  }
+};
+
+// UPDATE PRODUCT
+exports.updateProduct = async (req, res) => {
+  try {
+    const {
+      name,
+      price,
+      description,
+      type,
+      discount,
+      offerEndsAt,
+    } = req.body;
+
+    const numericPrice = Number(price);
+    const numericDiscount = Number(discount) || 0;
+
+    let discountedPrice = numericPrice;
+
+    if (numericDiscount > 0) {
+      discountedPrice = numericPrice - (numericPrice * numericDiscount) / 100;
+    }
+
+    const updateData = {
+      name,
+      price: numericPrice,
+      discount: numericDiscount,
+      discountedPrice,
+      offerEndsAt: offerEndsAt || null,
+      description,
+      type,
+    };
+
+    if (req.file) {
+      updateData.image = `http://localhost:5000/uploads/${req.file.filename}`;
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    );
+
+    res.json(updatedProduct);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error updating product" });
   }
 };
 
@@ -82,8 +144,6 @@ exports.deleteProduct = async (req, res) => {
     res.json({ message: "Product deleted" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      message: "Error deleting product",
-    });
+    res.status(500).json({ message: "Error deleting product" });
   }
 };
