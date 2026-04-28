@@ -1,29 +1,24 @@
 const express = require("express");
 const router = express.Router();
-
 const upload = require("../config/upload");
 
-const {
-  createBusiness,
-  getAllBusinesses,
-  getBusinessByUser,
-  getBusinessById,
-  deleteBusiness,
-} = require("../controllers/businessController");
+const businessController = require("../controllers/businessController");
 
-// CREATE BUSINESS (with image)
-router.post("/", upload.single("coverImage"), createBusiness);
+// 🔍 DEBUG CHECK
+console.log("Controller:", businessController);
 
-// GET ALL (homepage)
-router.get("/", getAllBusinesses);
+// ================= ADMIN ROUTES =================
+router.get("/admin/all", businessController.getAllBusinessesAdmin);
+router.get("/admin/stats", businessController.getAdminStats);
+router.put("/admin/approve/:id", businessController.approveBusiness);
+router.put("/admin/reject/:id", businessController.rejectBusiness);
+router.put("/admin/ban/:id", businessController.banBusiness);
 
-// GET USER BUSINESS
-router.get("/:userId", getBusinessByUser);
-
-// GET SINGLE BUSINESS
-router.get("/single/:id", getBusinessById);
-
-// DELETE
-router.delete("/:id", deleteBusiness);
+// ================= USER ROUTES =================
+router.post("/", upload.single("coverImage"), businessController.createBusiness);
+router.get("/", businessController.getAllBusinesses);
+router.get("/:userId", businessController.getBusinessByUser);
+router.get("/single/:id", businessController.getBusinessById);
+router.delete("/:id", businessController.deleteBusiness);
 
 module.exports = router;

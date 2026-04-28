@@ -1,170 +1,192 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
+import Sidebar from "../components/Sidebar";
+import Navbar from "../components/Navbar";
+
 function AdminDashboard() {
   const [businesses, setBusinesses] = useState([]);
   const [stats, setStats] = useState(null);
 
   const user = JSON.parse(localStorage.getItem("user"));
 
-  const fetchData = async () => {
-    const businessRes = await fetch("http://localhost:5000/api/business/admin/all");
-    const businessData = await businessRes.json();
-    setBusinesses(businessData);
-
-    const statsRes = await fetch("http://localhost:5000/api/business/admin/stats");
-    const statsData = await statsRes.json();
-    setStats(statsData);
-  };
-
   useEffect(() => {
-    fetchData();
+    fetchBusinesses();
+    fetchStats();
   }, []);
 
-  const approveBusiness = async (id) => {
-    await fetch(`http://localhost:5000/api/business/admin/approve/${id}`, {
-      method: "PUT",
-    });
-
-    toast.success("Business approved");
-    fetchData();
+  const fetchBusinesses = async () => {
+    const res = await fetch("http://localhost:5000/api/business/admin/all");
+    const data = await res.json();
+    setBusinesses(data);
   };
 
-  const rejectBusiness = async (id) => {
-    await fetch(`http://localhost:5000/api/business/admin/reject/${id}`, {
-      method: "PUT",
-    });
-
-    toast.error("Business rejected");
-    fetchData();
+  const fetchStats = async () => {
+    const res = await fetch("http://localhost:5000/api/business/admin/stats");
+    const data = await res.json();
+    setStats(data);
   };
 
-  const banBusiness = async (id) => {
-    const confirmBan = window.confirm("Are you sure you want to ban this business?");
-    if (!confirmBan) return;
+  const handleAction = async (id, action) => {
+    await fetch(
+      `http://localhost:5000/api/business/admin/${action}/${id}`,
+      { method: "PUT" }
+    );
 
-    await fetch(`http://localhost:5000/api/business/admin/ban/${id}`, {
-      method: "PUT",
-    });
-
-    toast.error("Business banned");
-    fetchData();
+    toast.success(`Business ${action}ed`);
+    fetchBusinesses(); // 🔥 refresh instantly
   };
 
   if (!user || user.role !== "admin") {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-200 via-blue-200 to-pink-200">
-        <div className="bg-white p-8 rounded-xl shadow text-center">
-          <h1 className="text-2xl font-bold text-red-500">Access Denied</h1>
-          <p className="text-gray-600 mt-2">Only admins can view this page.</p>
-        </div>
-      </div>
-    );
+    return <div className="p-10">Access Denied</div>;
   }
 
   return (
-    <div className="min-h-screen p-8 bg-gradient-to-br from-purple-200 via-blue-200 to-pink-200">
-      <h1 className="text-3xl font-bold text-purple-700 mb-6">
-        Admin Dashboard
-      </h1>
+    <div className="min-h-screen p-4 bg-gradient-to-br from-purple-200 via-blue-200 to-pink-200">
 
-      {stats && (
-        <div className="grid grid-cols-5 gap-4 mb-8">
-          <div className="bg-white/70 p-4 rounded-xl shadow">
-            <p className="text-sm text-gray-500">Users</p>
-            <h2 className="text-2xl font-bold">{stats.totalUsers}</h2>
-          </div>
+      <div className="flex gap-4">
 
-          <div className="bg-white/70 p-4 rounded-xl shadow">
-            <p className="text-sm text-gray-500">Businesses</p>
-            <h2 className="text-2xl font-bold">{stats.totalBusinesses}</h2>
-          </div>
+        <Sidebar />
 
-          <div className="bg-white/70 p-4 rounded-xl shadow">
-            <p className="text-sm text-gray-500">Pending</p>
-            <h2 className="text-2xl font-bold text-yellow-500">
-              {stats.pendingBusinesses}
-            </h2>
-          </div>
+        <div className="flex-1 bg-white/40 backdrop-blur-xl p-6 rounded-2xl">
 
-          <div className="bg-white/70 p-4 rounded-xl shadow">
-            <p className="text-sm text-gray-500">Approved</p>
-            <h2 className="text-2xl font-bold text-green-600">
-              {stats.approvedBusinesses}
-            </h2>
-          </div>
+          <Navbar user={user} />
 
-          <div className="bg-white/70 p-4 rounded-xl shadow">
-            <p className="text-sm text-gray-500">Banned</p>
-            <h2 className="text-2xl font-bold text-red-500">
-              {stats.bannedBusinesses}
-            </h2>
-          </div>
-        </div>
-      )}
+          <h1 className="text-2xl font-bold text-purple-700 mb-6">
+            Admin Dashboard
+          </h1>
 
-      <div className="bg-white/70 p-6 rounded-2xl shadow">
-        <h2 className="text-xl font-semibold mb-4">Business Requests</h2>
+          {/* STATS */}
+          {stats && (
+            <div className="grid grid-cols-4 gap-4 mb-6">
 
-        {businesses.length === 0 ? (
-          <p>No businesses found.</p>
-        ) : (
-          <div className="space-y-4">
-            {businesses.map((business) => (
+              <div className="bg-white/80 backdrop-blur p-4 rounded-xl shadow">
+                👥 Users: {stats.totalUsers}
+              </div>
+
+              <div className="bg-white/80 backdrop-blur p-4 rounded-xl shadow">
+                🏪 Businesses: {stats.totalBusinesses}
+              </div>
+
+              <div className="bg-yellow-100 p-4 rounded-xl shadow">
+                ⏳ Pending: {stats.pendingBusinesses}
+              </div>
+
+              <div className="bg-green-100 p-4 rounded-xl shadow">
+                ✅ Approved: {stats.approvedBusinesses}
+              </div>
+
+            </div>
+          )}
+
+          {/* BUSINESS LIST */}
+          <div className="grid gap-6">
+
+            {businesses.map((b) => (
               <div
-                key={business._id}
-                className="bg-white p-4 rounded-xl shadow flex justify-between items-center"
+                key={b._id}
+                className="bg-white/80 backdrop-blur-xl p-5 rounded-2xl shadow flex gap-6"
               >
-                <div>
-                  <h3 className="font-bold text-lg">{business.name}</h3>
-                  <p className="text-sm text-gray-500">{business.category}</p>
-                  <p className="text-sm">Owner: {business.ownerName}</p>
 
-                  <p
-                    className={`text-sm font-semibold mt-1 ${
-                      business.status === "approved"
-                        ? "text-green-600"
-                        : business.status === "pending"
-                        ? "text-yellow-600"
-                        : "text-red-500"
-                    }`}
-                  >
-                    Status: {business.status}
+                {/* IMAGE */}
+                <img
+                  src={b.coverImage || "https://via.placeholder.com/150"}
+                  className="w-40 h-28 object-cover rounded-xl"
+                />
+
+                {/* DETAILS */}
+                <div className="flex-1">
+
+                  <h2 className="text-lg font-bold text-gray-800">
+                    {b.name}
+                  </h2>
+
+                  <p className="text-sm text-gray-500">
+                    {b.category}
                   </p>
+
+                  <p className="text-sm mt-1">
+                    👤 Owner: {b.ownerName}
+                  </p>
+
+                  <p className="text-sm mt-1 text-gray-600">
+                    {b.description}
+                  </p>
+
+                  {/* STATUS BADGE */}
+                  <span
+                    className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold
+                      ${
+                        b.status === "approved"
+                          ? "bg-green-100 text-green-600"
+                          : b.status === "pending"
+                          ? "bg-yellow-100 text-yellow-600"
+                          : "bg-red-100 text-red-600"
+                      }`}
+                  >
+                    {b.status}
+                  </span>
+
                 </div>
 
-                <div className="flex gap-2">
-                  {business.status === "pending" && (
+                {/* ACTION BUTTONS */}
+                <div className="flex flex-col gap-2 justify-center">
+
+                  {/* PENDING */}
+                  {b.status === "pending" && (
                     <>
                       <button
-                        onClick={() => approveBusiness(business._id)}
-                        className="bg-green-500 text-white px-4 py-2 rounded-lg"
+                        onClick={() =>
+                          handleAction(b._id, "approve")
+                        }
+                        className="bg-green-500 text-white px-4 py-1 rounded-lg"
                       >
                         Approve
                       </button>
 
                       <button
-                        onClick={() => rejectBusiness(business._id)}
-                        className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                        onClick={() =>
+                          handleAction(b._id, "reject")
+                        }
+                        className="bg-yellow-500 text-white px-4 py-1 rounded-lg"
                       >
                         Reject
                       </button>
                     </>
                   )}
 
-                  {business.status !== "banned" && (
+                  {/* APPROVED */}
+                  {b.status === "approved" && (
                     <button
-                      onClick={() => banBusiness(business._id)}
-                      className="bg-black text-white px-4 py-2 rounded-lg"
+                      onClick={() =>
+                        handleAction(b._id, "ban")
+                      }
+                      className="bg-red-500 text-white px-4 py-1 rounded-lg"
                     >
                       Ban
                     </button>
                   )}
+
+                  {/* REJECTED */}
+                  {b.status === "rejected" && (
+                    <button
+                      onClick={() =>
+                        handleAction(b._id, "approve")
+                      }
+                      className="bg-green-500 text-white px-4 py-1 rounded-lg"
+                    >
+                      Approve Again
+                    </button>
+                  )}
+
                 </div>
+
               </div>
             ))}
+
           </div>
-        )}
+
+        </div>
       </div>
     </div>
   );
