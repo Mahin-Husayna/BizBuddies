@@ -9,7 +9,7 @@ const businessSchema = new mongoose.Schema({
 
   ownerName: {
     type: String,
-    default: "Unknown", // ✅ prevents crash
+    default: "Unknown",
   },
 
   name: {
@@ -30,6 +30,12 @@ const businessSchema = new mongoose.Schema({
   coverImage: {
     type: String,
     default: "",
+  },
+
+  status: {
+    type: String,
+    enum: ["pending", "approved", "rejected", "banned"],
+    default: "pending",
   },
 
   createdAt: {

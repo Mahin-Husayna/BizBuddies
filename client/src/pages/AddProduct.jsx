@@ -8,6 +8,7 @@ import Navbar from "../components/Navbar";
 function AddProduct() {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
+  const [stock, setStock] = useState(""); // ✅ NEW
   const [discount, setDiscount] = useState("");
   const [offerEndsAt, setOfferEndsAt] = useState("");
   const [image, setImage] = useState(null);
@@ -31,14 +32,10 @@ function AddProduct() {
 
       const business = await resBusiness.json();
 
-      if (!business || !business._id) {
-        toast.error("No business found. Create a business first.");
-        return;
-      }
-
       const formData = new FormData();
       formData.append("name", name);
       formData.append("price", price);
+      formData.append("stock", stock); // ✅ NEW
       formData.append("discount", discount || 0);
       formData.append("offerEndsAt", offerEndsAt || "");
       formData.append("seller", business.name);
@@ -54,7 +51,7 @@ function AddProduct() {
       });
 
       if (res.ok) {
-        toast.success("Product added successfully!");
+        toast.success("Product added!");
         navigate("/my-business");
       } else {
         toast.error("Error adding product");
@@ -67,7 +64,7 @@ function AddProduct() {
 
   return (
     <div className="min-h-screen p-4 bg-gradient-to-br from-purple-200 via-blue-200 to-pink-200">
-      <div className="flex gap-4 items-start">
+      <div className="flex gap-4">
         <Sidebar />
 
         <div className="flex-1 bg-white/40 backdrop-blur-xl p-6 rounded-2xl">
@@ -77,69 +74,45 @@ function AddProduct() {
             Add Product
           </h1>
 
-          <form
-            onSubmit={handleSubmit}
-            className="bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow max-w-lg flex flex-col gap-4"
-          >
+          <form className="space-y-4" onSubmit={handleSubmit}>
+
+            <input placeholder="Name" onChange={(e) => setName(e.target.value)} />
+            <input type="number" placeholder="Price" onChange={(e) => setPrice(e.target.value)} />
+
+            {/* ✅ STOCK */}
             <input
-              type="text"
-              placeholder="Product Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="border p-3 rounded-lg outline-none focus:ring-2 focus:ring-purple-400"
-              required
+              type="number"
+              placeholder="Stock Quantity"
+              onChange={(e) => setStock(e.target.value)}
             />
 
             <input
               type="number"
-              placeholder="Price"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              className="border p-3 rounded-lg outline-none focus:ring-2 focus:ring-purple-400"
-              required
-            />
-
-            <input
-              type="number"
-              placeholder="Discount % (optional)"
-              value={discount}
+              placeholder="Discount %"
               onChange={(e) => setDiscount(e.target.value)}
-              className="border p-3 rounded-lg outline-none focus:ring-2 focus:ring-purple-400"
             />
 
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">
-                Limited-time offer ends at (optional)
-              </label>
-              <input
-                type="datetime-local"
-                value={offerEndsAt}
-                onChange={(e) => setOfferEndsAt(e.target.value)}
-                className="border p-3 rounded-lg outline-none focus:ring-2 focus:ring-purple-400 w-full"
-              />
-            </div>
+            <input
+              type="datetime-local"
+              onChange={(e) => setOfferEndsAt(e.target.value)}
+            />
 
             <input
               type="file"
-              accept="image/*"
               onChange={(e) => handleImageChange(e.target.files[0])}
-              className="border p-2 rounded-lg"
             />
 
             {preview && (
               <img
                 src={preview}
-                alt="preview"
-                className="w-full h-40 object-cover rounded-lg"
+                className="w-full h-40 object-cover rounded"
               />
             )}
 
-            <button
-              type="submit"
-              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-semibold hover:scale-105 transition"
-            >
+            <button className="bg-purple-500 text-white px-4 py-2 rounded">
               Add Product
             </button>
+
           </form>
         </div>
       </div>

@@ -11,17 +11,17 @@ const {
   deleteBusiness,
 } = require("../controllers/businessController");
 
-// CREATE
+// CREATE BUSINESS (with image)
 router.post("/", upload.single("coverImage"), createBusiness);
 
 // GET ALL (homepage)
 router.get("/", getAllBusinesses);
 
-// GET ONE
-router.get("/single/:id", getBusinessById);
-
 // GET USER BUSINESS
 router.get("/:userId", getBusinessByUser);
+
+// GET SINGLE BUSINESS
+router.get("/single/:id", getBusinessById);
 
 // DELETE
 router.delete("/:id", deleteBusiness);

@@ -12,10 +12,16 @@ exports.createProduct = async (req, res) => {
       type,
       discount,
       offerEndsAt,
+      stock,
     } = req.body;
+
+    const image = req.file
+      ? `http://localhost:5000/uploads/${req.file.filename}`
+      : "";
 
     const numericPrice = Number(price);
     const numericDiscount = Number(discount) || 0;
+    const numericStock = Number(stock) || 0;
 
     let discountedPrice = numericPrice;
 
@@ -23,13 +29,10 @@ exports.createProduct = async (req, res) => {
       discountedPrice = numericPrice - (numericPrice * numericDiscount) / 100;
     }
 
-    const image = req.file
-      ? `http://localhost:5000/uploads/${req.file.filename}`
-      : "";
-
     const product = new Product({
       name,
       price: numericPrice,
+      stock: numericStock,
       discount: numericDiscount,
       discountedPrice,
       offerEndsAt: offerEndsAt || null,
@@ -61,6 +64,7 @@ exports.getProducts = async (req, res) => {
 
     res.status(200).json(products);
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       message: "Error fetching products",
       error,
@@ -79,6 +83,7 @@ exports.getProductsByBusiness = async (req, res) => {
 
     res.status(200).json(products);
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       message: "Error fetching business products",
       error,
@@ -96,10 +101,12 @@ exports.updateProduct = async (req, res) => {
       type,
       discount,
       offerEndsAt,
+      stock,
     } = req.body;
 
     const numericPrice = Number(price);
     const numericDiscount = Number(discount) || 0;
+    const numericStock = Number(stock) || 0;
 
     let discountedPrice = numericPrice;
 
@@ -110,6 +117,7 @@ exports.updateProduct = async (req, res) => {
     const updateData = {
       name,
       price: numericPrice,
+      stock: numericStock,
       discount: numericDiscount,
       discountedPrice,
       offerEndsAt: offerEndsAt || null,
@@ -127,10 +135,13 @@ exports.updateProduct = async (req, res) => {
       { new: true }
     );
 
-    res.json(updatedProduct);
+    res.status(200).json(updatedProduct);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error updating product" });
+    res.status(500).json({
+      message: "Error updating product",
+      error,
+    });
   }
 };
 
@@ -144,6 +155,9 @@ exports.deleteProduct = async (req, res) => {
     res.json({ message: "Product deleted" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error deleting product" });
+    res.status(500).json({
+      message: "Error deleting product",
+      error,
+    });
   }
 };

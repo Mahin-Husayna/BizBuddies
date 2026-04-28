@@ -4,6 +4,12 @@ const productSchema = new mongoose.Schema({
   name: String,
   price: Number,
 
+  // ✅ NEW STOCK FIELD
+  stock: {
+    type: Number,
+    default: 0,
+  },
+
   discount: {
     type: Number,
     default: 0,

@@ -8,12 +8,10 @@ function BusinessProfile() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    // Fetch business
     fetch(`http://localhost:5000/api/business/single/${id}`)
       .then((res) => res.json())
       .then((data) => setBusiness(data));
 
-    // Fetch products
     fetch(`http://localhost:5000/api/products/business/${id}`)
       .then((res) => res.json())
       .then((data) => setProducts(data));
@@ -27,90 +25,106 @@ function BusinessProfile() {
       {/* MAIN CARD */}
       <div className="bg-white/50 backdrop-blur-xl rounded-2xl shadow-lg overflow-hidden">
 
-        {/* ✅ COVER IMAGE */}
+        {/* COVER */}
         <img
           src={business.coverImage || "https://via.placeholder.com/800x300"}
-          alt="cover"
           className="w-full h-64 object-cover"
         />
 
-        {/* CONTENT */}
         <div className="p-6">
 
-          {/* HEADER */}
           <div className="flex items-center gap-4">
-
-            {/* ICON */}
             <div className="w-16 h-16 bg-purple-300 rounded-full flex items-center justify-center text-2xl">
               🏪
             </div>
 
-            {/* INFO */}
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">
+              <h1 className="text-2xl font-bold">
                 {business.name}
               </h1>
 
-              <p className="text-gray-600 text-sm">
+              <p className="text-sm text-gray-600">
                 {business.category}
               </p>
 
-              <p className="text-yellow-500 text-sm">
-                ⭐ 4.5 (120 reviews)
-              </p>
-
-              <p className="text-gray-700 text-sm mt-2 font-medium">
-                👤 Owner: {business.ownerName}
+              <p className="text-gray-700 text-sm mt-2">
+                👤 {business.ownerName}
               </p>
             </div>
-
           </div>
 
-          {/* DESCRIPTION */}
           <p className="mt-4 text-gray-700">
             {business.description}
           </p>
-
         </div>
       </div>
 
-      {/* PRODUCTS SECTION */}
+      {/* PRODUCTS */}
       <div className="mt-8">
-
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+        <h2 className="text-xl font-semibold mb-4">
           Products
         </h2>
 
         {products.length === 0 ? (
-          <p className="text-gray-500">No products yet</p>
+          <p>No products yet</p>
         ) : (
           <div className="grid grid-cols-3 gap-4">
 
             {products.map((product) => (
               <div
                 key={product._id}
-                className="bg-white/70 backdrop-blur-lg p-4 rounded-xl shadow hover:shadow-lg transition"
+                className="bg-white/70 p-4 rounded-xl shadow"
               >
+
                 <img
                   src={product.image || "https://via.placeholder.com/150"}
-                  alt={product.name}
-                  className="w-full h-28 object-cover rounded-lg mb-3"
+                  className="w-full h-28 object-cover rounded mb-2"
                 />
 
-                <h3 className="font-semibold text-sm">
+                <h3 className="text-sm font-semibold">
                   {product.name}
                 </h3>
 
-                <p className="text-purple-600 font-bold mt-1">
-                  ৳{product.price}
-                </p>
+                {/* PRICE */}
+                {product.discount > 0 ? (
+                  <>
+                    <p className="text-xs text-gray-400 line-through">
+                      ৳{product.price}
+                    </p>
+                    <p className="text-purple-600 font-bold">
+                      ৳{Math.round(product.discountedPrice)}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-purple-600 font-bold">
+                    ৳{product.price}
+                  </p>
+                )}
+
+                {/* STOCK */}
+                {product.stock > 0 ? (
+                  <p className="text-green-600 text-xs mt-1">
+                    In Stock ({product.stock})
+                  </p>
+                ) : (
+                  <p className="text-red-500 text-xs mt-1">
+                    Out of Stock
+                  </p>
+                )}
+
+                {/* TIMER */}
+                {product.offerEndsAt && (
+                  <p className="text-red-500 text-xs mt-1">
+                    Limited Offer
+                  </p>
+                )}
+
               </div>
             ))}
 
           </div>
         )}
       </div>
-
     </div>
   );
 }

@@ -10,6 +10,7 @@ import AddProduct from "./pages/AddProduct";
 import BusinessProfile from "./pages/BusinessProfile";
 import Search from "./pages/Search";
 import EditProduct from "./pages/EditProduct";
+import AdminDashboard from "./pages/AdminDashboard";
 
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/admin" element={<AdminDashboard />} />
 
 
 

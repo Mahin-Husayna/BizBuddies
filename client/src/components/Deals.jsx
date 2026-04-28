@@ -8,6 +8,7 @@ function Deals() {
   const scrollRef = useRef(null);
   const navigate = useNavigate();
 
+  // FETCH PRODUCTS
   useEffect(() => {
     fetch("http://localhost:5000/api/products")
       .then((res) => res.json())
@@ -15,6 +16,7 @@ function Deals() {
       .catch((err) => console.error(err));
   }, []);
 
+  // TIMER REFRESH
   useEffect(() => {
     const timer = setInterval(() => {
       setNow(new Date());
@@ -34,14 +36,12 @@ function Deals() {
   const openBusiness = (product) => {
     if (!product.business) return;
 
-    const businessId =
+    const id =
       typeof product.business === "object"
         ? product.business._id
         : product.business;
 
-    if (!businessId) return;
-
-    navigate(`/business/${businessId}`);
+    navigate(`/business/${id}`);
   };
 
   const getRemainingTime = (endTime) => {
@@ -51,25 +51,24 @@ function Deals() {
 
     if (diff <= 0) return "Expired";
 
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff / (1000 * 60)) % 60);
     const seconds = Math.floor((diff / 1000) % 60);
 
-    if (days > 0) return `${days}d ${hours}h ${minutes}m`;
     return `${hours}h ${minutes}m ${seconds}s`;
   };
 
-  const activeDeals = products.filter((product) => {
-    if (!product.discount || product.discount <= 0) return false;
-
-    if (!product.offerEndsAt) return true;
-
-    return new Date(product.offerEndsAt) > now;
+  // FILTER DEALS
+  const deals = products.filter((p) => {
+    if (!p.discount || p.discount <= 0) return false;
+    if (!p.offerEndsAt) return true;
+    return new Date(p.offerEndsAt) > now;
   });
 
   return (
     <div className="mt-8">
+
+      {/* HEADER */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold text-gray-800">
           Recent Deals
@@ -78,35 +77,38 @@ function Deals() {
         <div className="flex gap-2">
           <button
             onClick={scrollLeft}
-            className="bg-white/70 px-3 py-1 rounded-lg shadow hover:scale-105 transition"
+            className="bg-white/70 px-3 py-1 rounded-lg shadow hover:scale-105"
           >
             ◀
           </button>
 
           <button
             onClick={scrollRight}
-            className="bg-white/70 px-3 py-1 rounded-lg shadow hover:scale-105 transition"
+            className="bg-white/70 px-3 py-1 rounded-lg shadow hover:scale-105"
           >
             ▶
           </button>
         </div>
       </div>
 
-      {activeDeals.length === 0 ? (
+      {/* DEALS */}
+      {deals.length === 0 ? (
         <p className="text-gray-500 text-sm">
-          No active deals right now.
+          No deals available right now
         </p>
       ) : (
         <div className="flex justify-center">
           <div
             ref={scrollRef}
-            className="flex gap-4 overflow-x-auto scrollbar-hide max-w-[750px] pb-2"
+            className="flex gap-4 overflow-x-auto max-w-[750px] pb-2"
           >
-            {activeDeals.map((product) => (
+            {deals.map((product) => (
               <div
                 key={product._id}
-                className="min-w-[230px] max-w-[230px] bg-white/70 backdrop-blur-lg p-4 rounded-xl shadow hover:shadow-lg transition relative"
+                className="min-w-[230px] bg-white/70 p-4 rounded-xl shadow relative"
               >
+
+                {/* DISCOUNT BADGE */}
                 <span className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
                   {product.discount}% OFF
                 </span>
@@ -117,7 +119,9 @@ function Deals() {
                   className="w-full h-28 object-cover rounded-lg mb-3"
                 />
 
-                <h3 className="font-semibold text-sm">{product.name}</h3>
+                <h3 className="font-semibold text-sm">
+                  {product.name}
+                </h3>
 
                 <p
                   onClick={() => openBusiness(product)}
@@ -126,6 +130,7 @@ function Deals() {
                   {product.seller}
                 </p>
 
+                {/* PRICE */}
                 <div className="mt-2">
                   <p className="text-xs text-gray-400 line-through">
                     ৳{product.price}
@@ -136,11 +141,24 @@ function Deals() {
                   </p>
                 </div>
 
+                {/* STOCK */}
+                {product.stock > 0 ? (
+                  <p className="text-green-600 text-xs mt-1">
+                    In Stock
+                  </p>
+                ) : (
+                  <p className="text-red-500 text-xs mt-1">
+                    Out of Stock
+                  </p>
+                )}
+
+                {/* TIMER */}
                 {product.offerEndsAt && (
-                  <p className="text-xs text-red-500 mt-2">
+                  <p className="text-red-500 text-xs mt-1">
                     ⏳ {getRemainingTime(product.offerEndsAt)}
                   </p>
                 )}
+
               </div>
             ))}
           </div>
