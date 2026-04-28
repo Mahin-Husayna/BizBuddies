@@ -15,8 +15,8 @@ function MyBusiness() {
   useEffect(() => {
     if (!user || !user._id) return;
 
-    // ✅ FIXED USER ID
-    fetch(`http://localhost:5000/api/business/${user._id}`)
+    // ✅ FIXED API ROUTE (IMPORTANT)
+    fetch(`http://localhost:5000/api/business/user/${user._id}`)
       .then((res) => res.json())
       .then((data) => {
         setBusiness(data);
@@ -118,10 +118,16 @@ function MyBusiness() {
                 )}
               </div>
 
-              {/* ADD PRODUCT */}
+              {/* ========================= */}
+              {/* 🔥 FIXED ADD PRODUCT BUTTON */}
+              {/* ========================= */}
               {business.status === "approved" && (
                 <button
-                  onClick={() => navigate("/add-product")}
+                  onClick={() =>
+                    navigate("/add-product", {
+                      state: { businessId: business._id },
+                    })
+                  }
                   className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-xl mb-6"
                 >
                   + Add Product

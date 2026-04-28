@@ -1,15 +1,25 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiSearch, FiBell, FiMessageCircle } from "react-icons/fi";
+import { io } from "socket.io-client";
 
 function Navbar({ user }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState({ products: [], businesses: [] });
   const [showDropdown, setShowDropdown] = useState(false);
 
+  // 🔔 Notifications
+  const [notifications, setNotifications] = useState([]);
+  const [showNotif, setShowNotif] = useState(false);
+
   const navigate = useNavigate();
 
-  // 🔍 LIVE SEARCH
+  // ✅ CREATE SOCKET ONCE
+  const [socket] = useState(() => io("http://localhost:5000"));
+
+  // =========================
+  // 🔍 LIVE SEARCH (UNCHANGED)
+  // =========================
   useEffect(() => {
     if (!query.trim()) {
       setShowDropdown(false);
@@ -28,7 +38,77 @@ function Navbar({ user }) {
     return () => clearTimeout(delay);
   }, [query]);
 
-  // ⌨️ ENTER SEARCH
+  // =========================
+  // 🔁 FETCH NOTIFICATIONS (POLLING BACKUP)
+  // =========================
+  const fetchNotifications = async () => {
+    if (!user?._id) return;
+
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/notifications/${user._id}`
+      );
+      const data = await res.json();
+      setNotifications(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+
+    const interval = setInterval(fetchNotifications, 5000);
+
+    return () => clearInterval(interval);
+  }, [user]);
+
+  // =========================
+  // ⚡ SOCKET REALTIME
+  // =========================
+  useEffect(() => {
+    if (!user?._id) return;
+
+    // register user
+    socket.emit("register", user._id);
+
+    // listen for notification
+    socket.on("newNotification", (data) => {
+      setNotifications((prev) => [
+        {
+          _id: Date.now(),
+          message: data.message,
+          isRead: false,
+        },
+        ...prev,
+      ]);
+    });
+
+    return () => {
+      socket.off("newNotification");
+    };
+  }, [user, socket]);
+
+  // =========================
+  // 🔴 UNREAD COUNT
+  // =========================
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+
+  // =========================
+  // MARK AS READ
+  // =========================
+  const markAsRead = async (id) => {
+    await fetch(
+      `http://localhost:5000/api/notifications/read/${id}`,
+      { method: "PUT" }
+    );
+
+    fetchNotifications();
+  };
+
+  // =========================
+  // SEARCH HANDLERS
+  // =========================
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       navigate(`/search?q=${query}`);
@@ -36,7 +116,6 @@ function Navbar({ user }) {
     }
   };
 
-  // 🔘 BUTTON CLICK SEARCH
   const handleSearchClick = () => {
     if (!query.trim()) return;
     navigate(`/search?q=${query}`);
@@ -51,7 +130,6 @@ function Navbar({ user }) {
 
         <div className="flex items-center bg-white/70 backdrop-blur rounded-xl shadow-sm overflow-hidden">
 
-          {/* INPUT */}
           <input
             type="text"
             placeholder="Search businesses, deals..."
@@ -61,7 +139,6 @@ function Navbar({ user }) {
             className="flex-1 px-4 py-2 bg-transparent outline-none text-sm"
           />
 
-          {/* BUTTON */}
           <button
             onClick={handleSearchClick}
             className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:opacity-90 transition"
@@ -70,11 +147,10 @@ function Navbar({ user }) {
           </button>
         </div>
 
-        {/* 🔽 DROPDOWN */}
+        {/* 🔽 SEARCH DROPDOWN */}
         {showDropdown && (
           <div className="absolute w-full bg-white mt-2 rounded-xl shadow-lg z-50 max-h-80 overflow-y-auto">
 
-            {/* BUSINESSES */}
             {results.businesses.length > 0 && (
               <div className="p-3 border-b">
                 <p className="text-xs text-gray-400 mb-2">Businesses</p>
@@ -94,7 +170,6 @@ function Navbar({ user }) {
               </div>
             )}
 
-            {/* PRODUCTS */}
             {results.products.length > 0 && (
               <div className="p-3">
                 <p className="text-xs text-gray-400 mb-2">Products</p>
@@ -119,11 +194,61 @@ function Navbar({ user }) {
       </div>
 
       {/* 🔔 RIGHT SIDE */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 relative">
 
-        <FiBell className="text-lg cursor-pointer" />
+        {/* 🔔 BELL */}
+        <div className="relative cursor-pointer">
+
+          <FiBell
+            className="text-lg"
+            onClick={() => setShowNotif(!showNotif)}
+          />
+
+          {/* 🔴 BADGE */}
+          {unreadCount > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-1.5 rounded-full">
+              {unreadCount}
+            </span>
+          )}
+
+          {/* 🔽 DROPDOWN */}
+          {showNotif && (
+            <div className="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-lg z-50 max-h-80 overflow-y-auto">
+
+              {notifications.length === 0 ? (
+                <p className="p-4 text-gray-500">
+                  No notifications
+                </p>
+              ) : (
+                notifications.map((n) => (
+                  <div
+                    key={n._id}
+                    onClick={() => markAsRead(n._id)}
+                    className={`p-3 border-b cursor-pointer ${
+                      n.isRead ? "bg-gray-100" : "bg-white"
+                    }`}
+                  >
+                    <p className="text-sm">{n.message}</p>
+                  </div>
+                ))
+              )}
+
+              <div
+                onClick={() => navigate("/notifications")}
+                className="p-3 text-center text-purple-600 cursor-pointer hover:bg-gray-100"
+              >
+                View All
+              </div>
+
+            </div>
+          )}
+
+        </div>
+
+        {/* 💬 MESSAGE ICON */}
         <FiMessageCircle className="text-lg cursor-pointer" />
 
+        {/* 👤 USER */}
         <div className="flex items-center gap-2">
           <img
             src="https://i.pravatar.cc/40"

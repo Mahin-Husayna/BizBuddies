@@ -1,6 +1,8 @@
 const Product = require("../models/Product");
 
+// =========================
 // CREATE PRODUCT
+// =========================
 exports.createProduct = async (req, res) => {
   try {
     const {
@@ -15,6 +17,13 @@ exports.createProduct = async (req, res) => {
       stock,
     } = req.body;
 
+    // 🔥 CRITICAL FIX
+    if (!business || business === "undefined") {
+      return res.status(400).json({
+        message: "Business ID is required",
+      });
+    }
+
     const image = req.file
       ? `http://localhost:5000/uploads/${req.file.filename}`
       : "";
@@ -26,7 +35,8 @@ exports.createProduct = async (req, res) => {
     let discountedPrice = numericPrice;
 
     if (numericDiscount > 0) {
-      discountedPrice = numericPrice - (numericPrice * numericDiscount) / 100;
+      discountedPrice =
+        numericPrice - (numericPrice * numericDiscount) / 100;
     }
 
     const product = new Product({
@@ -47,15 +57,16 @@ exports.createProduct = async (req, res) => {
 
     res.status(201).json(product);
   } catch (error) {
-    console.error(error);
+    console.error("CREATE PRODUCT ERROR:", error);
     res.status(500).json({
       message: "Error creating product",
-      error,
     });
   }
 };
 
+// =========================
 // GET ALL PRODUCTS
+// =========================
 exports.getProducts = async (req, res) => {
   try {
     const products = await Product.find()
@@ -67,31 +78,40 @@ exports.getProducts = async (req, res) => {
     console.error(error);
     res.status(500).json({
       message: "Error fetching products",
-      error,
     });
   }
 };
 
+// =========================
 // GET PRODUCTS BY BUSINESS
+// =========================
 exports.getProductsByBusiness = async (req, res) => {
   try {
     const { businessId } = req.params;
 
-    const products = await Product.find({ business: businessId }).sort({
-      createdAt: -1,
-    });
+    // 🔥 SAFETY
+    if (!businessId || businessId === "undefined") {
+      return res.status(400).json({
+        message: "Invalid businessId",
+      });
+    }
+
+    const products = await Product.find({
+      business: businessId,
+    }).sort({ createdAt: -1 });
 
     res.status(200).json(products);
   } catch (error) {
     console.error(error);
     res.status(500).json({
       message: "Error fetching business products",
-      error,
     });
   }
 };
 
+// =========================
 // UPDATE PRODUCT
+// =========================
 exports.updateProduct = async (req, res) => {
   try {
     const {
@@ -111,7 +131,8 @@ exports.updateProduct = async (req, res) => {
     let discountedPrice = numericPrice;
 
     if (numericDiscount > 0) {
-      discountedPrice = numericPrice - (numericPrice * numericDiscount) / 100;
+      discountedPrice =
+        numericPrice - (numericPrice * numericDiscount) / 100;
     }
 
     const updateData = {
@@ -140,12 +161,13 @@ exports.updateProduct = async (req, res) => {
     console.error(error);
     res.status(500).json({
       message: "Error updating product",
-      error,
     });
   }
 };
 
+// =========================
 // DELETE PRODUCT
+// =========================
 exports.deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -157,7 +179,6 @@ exports.deleteProduct = async (req, res) => {
     console.error(error);
     res.status(500).json({
       message: "Error deleting product",
-      error,
     });
   }
 };

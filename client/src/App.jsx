@@ -11,6 +11,7 @@ import BusinessProfile from "./pages/BusinessProfile";
 import Search from "./pages/Search";
 import EditProduct from "./pages/EditProduct";
 import AdminDashboard from "./pages/AdminDashboard";
+import Notifications from "./pages/Notifications";
 
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/home" element={<Home />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/notifications" element={<Notifications />} />
 
 
 

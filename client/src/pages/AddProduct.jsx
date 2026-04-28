@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import Sidebar from "../components/Sidebar";
@@ -8,14 +8,19 @@ import Navbar from "../components/Navbar";
 function AddProduct() {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
-  const [stock, setStock] = useState(""); // ✅ NEW
+  const [stock, setStock] = useState("");
   const [discount, setDiscount] = useState("");
   const [offerEndsAt, setOfferEndsAt] = useState("");
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
 
   const navigate = useNavigate();
+  const location = useLocation();
+
   const user = JSON.parse(localStorage.getItem("user"));
+
+  // ✅ GET BUSINESS ID FROM NAVIGATION
+  const businessId = location.state?.businessId;
 
   const handleImageChange = (file) => {
     setImage(file);
@@ -25,21 +30,25 @@ function AddProduct() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    console.log("Business ID:", businessId);
+
+    // 🔥 CRITICAL CHECK
+    if (!businessId) {
+      toast.error("No business found. Please try again.");
+      return;
+    }
+
     try {
-      const resBusiness = await fetch(
-        `http://localhost:5000/api/business/${user.id}`
-      );
-
-      const business = await resBusiness.json();
-
       const formData = new FormData();
       formData.append("name", name);
       formData.append("price", price);
-      formData.append("stock", stock); // ✅ NEW
+      formData.append("stock", stock);
       formData.append("discount", discount || 0);
       formData.append("offerEndsAt", offerEndsAt || "");
-      formData.append("seller", business.name);
-      formData.append("business", business._id);
+      formData.append("business", businessId);
+
+      // Optional seller name
+      formData.append("seller", user?.name || "Seller");
 
       if (image) {
         formData.append("image", image);
@@ -50,11 +59,14 @@ function AddProduct() {
         body: formData,
       });
 
+      const data = await res.json();
+
       if (res.ok) {
         toast.success("Product added!");
         navigate("/my-business");
       } else {
-        toast.error("Error adding product");
+        console.error(data);
+        toast.error(data.message || "Error adding product");
       }
     } catch (error) {
       console.error(error);
@@ -65,6 +77,7 @@ function AddProduct() {
   return (
     <div className="min-h-screen p-4 bg-gradient-to-br from-purple-200 via-blue-200 to-pink-200">
       <div className="flex gap-4">
+
         <Sidebar />
 
         <div className="flex-1 bg-white/40 backdrop-blur-xl p-6 rounded-2xl">
@@ -76,30 +89,47 @@ function AddProduct() {
 
           <form className="space-y-4" onSubmit={handleSubmit}>
 
-            <input placeholder="Name" onChange={(e) => setName(e.target.value)} />
-            <input type="number" placeholder="Price" onChange={(e) => setPrice(e.target.value)} />
+            <input
+              placeholder="Name"
+              onChange={(e) => setName(e.target.value)}
+              className="w-full p-2 rounded border"
+              required
+            />
+
+            <input
+              type="number"
+              placeholder="Price"
+              onChange={(e) => setPrice(e.target.value)}
+              className="w-full p-2 rounded border"
+              required
+            />
 
             {/* ✅ STOCK */}
             <input
               type="number"
               placeholder="Stock Quantity"
               onChange={(e) => setStock(e.target.value)}
+              className="w-full p-2 rounded border"
+              required
             />
 
             <input
               type="number"
               placeholder="Discount %"
               onChange={(e) => setDiscount(e.target.value)}
+              className="w-full p-2 rounded border"
             />
 
             <input
               type="datetime-local"
               onChange={(e) => setOfferEndsAt(e.target.value)}
+              className="w-full p-2 rounded border"
             />
 
             <input
               type="file"
               onChange={(e) => handleImageChange(e.target.files[0])}
+              className="w-full p-2 rounded border"
             />
 
             {preview && (
