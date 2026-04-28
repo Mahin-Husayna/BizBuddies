@@ -8,17 +8,17 @@ function Navbar({ user }) {
   const [results, setResults] = useState({ products: [], businesses: [] });
   const [showDropdown, setShowDropdown] = useState(false);
 
-  // 🔔 Notifications
   const [notifications, setNotifications] = useState([]);
   const [showNotif, setShowNotif] = useState(false);
 
-  const navigate = useNavigate();
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [notifCount, setNotifCount] = useState(0); // 🔥 NEW
 
-  // ✅ CREATE SOCKET ONCE
+  const navigate = useNavigate();
   const [socket] = useState(() => io("http://localhost:5000"));
 
   // =========================
-  // 🔍 LIVE SEARCH (UNCHANGED)
+  // 🔍 SEARCH (UNCHANGED)
   // =========================
   useEffect(() => {
     if (!query.trim()) {
@@ -39,7 +39,7 @@ function Navbar({ user }) {
   }, [query]);
 
   // =========================
-  // 🔁 FETCH NOTIFICATIONS (POLLING BACKUP)
+  // 🔁 FETCH NOTIFICATIONS
   // =========================
   const fetchNotifications = async () => {
     if (!user?._id) return;
@@ -57,22 +57,17 @@ function Navbar({ user }) {
 
   useEffect(() => {
     fetchNotifications();
-
-    const interval = setInterval(fetchNotifications, 5000);
-
-    return () => clearInterval(interval);
   }, [user]);
 
   // =========================
-  // ⚡ SOCKET REALTIME
+  // ⚡ SOCKET (FIXED)
   // =========================
   useEffect(() => {
     if (!user?._id) return;
 
-    // register user
     socket.emit("register", user._id);
 
-    // listen for notification
+    // 🔔 NOTIFICATION
     socket.on("newNotification", (data) => {
       setNotifications((prev) => [
         {
@@ -82,32 +77,72 @@ function Navbar({ user }) {
         },
         ...prev,
       ]);
+
+      // 🔥 FIX: update global notif count
+      const prev = Number(localStorage.getItem("notifCount") || 0);
+      const updated = prev + 1;
+
+      localStorage.setItem("notifCount", updated);
+      setNotifCount(updated);
+    });
+
+    // 💬 MESSAGE
+    socket.on("newMessage", () => {
+      const prev = Number(localStorage.getItem("msgCount") || 0);
+      const updated = prev + 1;
+
+      localStorage.setItem("msgCount", updated);
+      setUnreadMessages(updated);
+
+      // 🔥 ALSO increase notification count (IMPORTANT FIX)
+      const prevNotif = Number(localStorage.getItem("notifCount") || 0);
+      const updatedNotif = prevNotif + 1;
+
+      localStorage.setItem("notifCount", updatedNotif);
+      setNotifCount(updatedNotif);
     });
 
     return () => {
       socket.off("newNotification");
+      socket.off("newMessage");
     };
   }, [user, socket]);
 
   // =========================
-  // 🔴 UNREAD COUNT
+  // LOAD COUNTS (FIXED)
   // =========================
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  useEffect(() => {
+    const msgs = Number(localStorage.getItem("msgCount") || 0);
+    const notif = Number(localStorage.getItem("notifCount") || 0);
+
+    setUnreadMessages(msgs);
+    setNotifCount(notif);
+  }, []);
 
   // =========================
-  // MARK AS READ
+  // 🔔 BELL CLICK (FIXED)
   // =========================
-  const markAsRead = async (id) => {
-    await fetch(
-      `http://localhost:5000/api/notifications/read/${id}`,
-      { method: "PUT" }
-    );
+  const handleBellClick = async () => {
+    setShowNotif(!showNotif);
 
-    fetchNotifications();
+    if (!showNotif && user?._id) {
+      await fetch(
+        `http://localhost:5000/api/notifications/read-all/${user._id}`,
+        { method: "PUT" }
+      );
+
+      setNotifications((prev) =>
+        prev.map((n) => ({ ...n, isRead: true }))
+      );
+
+      // 🔥 RESET COUNT
+      localStorage.setItem("notifCount", 0);
+      setNotifCount(0);
+    }
   };
 
   // =========================
-  // SEARCH HANDLERS
+  // 🔍 SEARCH HANDLERS
   // =========================
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
@@ -125,11 +160,9 @@ function Navbar({ user }) {
   return (
     <div className="flex justify-between items-center mb-6 relative">
 
-      {/* 🔍 SEARCH BAR */}
+      {/* SEARCH */}
       <div className="w-1/2 relative">
-
         <div className="flex items-center bg-white/70 backdrop-blur rounded-xl shadow-sm overflow-hidden">
-
           <input
             type="text"
             placeholder="Search businesses, deals..."
@@ -141,20 +174,17 @@ function Navbar({ user }) {
 
           <button
             onClick={handleSearchClick}
-            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:opacity-90 transition"
+            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white"
           >
             <FiSearch size={18} />
           </button>
         </div>
 
-        {/* 🔽 SEARCH DROPDOWN */}
         {showDropdown && (
           <div className="absolute w-full bg-white mt-2 rounded-xl shadow-lg z-50 max-h-80 overflow-y-auto">
-
             {results.businesses.length > 0 && (
               <div className="p-3 border-b">
                 <p className="text-xs text-gray-400 mb-2">Businesses</p>
-
                 {results.businesses.map((b) => (
                   <div
                     key={b._id}
@@ -162,9 +192,6 @@ function Navbar({ user }) {
                     className="p-2 hover:bg-gray-100 cursor-pointer rounded"
                   >
                     {b.name}
-                    <span className="text-xs text-gray-500 ml-2">
-                      ({b.category})
-                    </span>
                   </div>
                 ))}
               </div>
@@ -173,82 +200,65 @@ function Navbar({ user }) {
             {results.products.length > 0 && (
               <div className="p-3">
                 <p className="text-xs text-gray-400 mb-2">Products</p>
-
                 {results.products.map((p) => (
-                  <div
-                    key={p._id}
-                    className="p-2 hover:bg-gray-100 rounded"
-                  >
+                  <div key={p._id} className="p-2 hover:bg-gray-100 rounded">
                     {p.name}
-                    <span className="text-xs text-purple-500 ml-2">
-                      ৳{p.price}
-                    </span>
                   </div>
                 ))}
               </div>
             )}
-
           </div>
         )}
-
       </div>
 
-      {/* 🔔 RIGHT SIDE */}
+      {/* RIGHT */}
       <div className="flex items-center gap-4 relative">
 
         {/* 🔔 BELL */}
         <div className="relative cursor-pointer">
+          <FiBell className="text-lg" onClick={handleBellClick} />
 
-          <FiBell
-            className="text-lg"
-            onClick={() => setShowNotif(!showNotif)}
-          />
-
-          {/* 🔴 BADGE */}
-          {unreadCount > 0 && (
+          {notifCount > 0 && (
             <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-1.5 rounded-full">
-              {unreadCount}
+              {notifCount}
             </span>
           )}
 
-          {/* 🔽 DROPDOWN */}
           {showNotif && (
             <div className="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-lg z-50 max-h-80 overflow-y-auto">
-
-              {notifications.length === 0 ? (
-                <p className="p-4 text-gray-500">
-                  No notifications
-                </p>
-              ) : (
-                notifications.map((n) => (
-                  <div
-                    key={n._id}
-                    onClick={() => markAsRead(n._id)}
-                    className={`p-3 border-b cursor-pointer ${
-                      n.isRead ? "bg-gray-100" : "bg-white"
-                    }`}
-                  >
-                    <p className="text-sm">{n.message}</p>
-                  </div>
-                ))
-              )}
-
-              <div
-                onClick={() => navigate("/notifications")}
-                className="p-3 text-center text-purple-600 cursor-pointer hover:bg-gray-100"
-              >
-                View All
-              </div>
-
+              {notifications.map((n) => (
+                <div
+                  key={n._id}
+                  className={`p-3 border-b ${
+                    n.isRead ? "bg-gray-100" : "bg-white"
+                  }`}
+                >
+                  {n.message}
+                </div>
+              ))}
             </div>
           )}
-
         </div>
 
-        {/* 💬 MESSAGE ICON */}
-        <FiMessageCircle className="text-lg cursor-pointer" />
+        {/* 💬 MESSAGE */}
+        <div
+          className="relative cursor-pointer"
+          onClick={() => {
+            localStorage.setItem("msgCount", 0);
+            setUnreadMessages(0);
+            navigate("/messages");
+          }}
+        >
+          <FiMessageCircle className="text-lg" />
 
-        {/* 👤 USER */}
+          {unreadMessages > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-1.5 rounded-full">
+              {unreadMessages}
+            </span>
+          )}
+        </div>
+
+        {/* USER */}
         <div className="flex items-center gap-2">
           <img
             src="https://i.pravatar.cc/40"
@@ -260,7 +270,6 @@ function Navbar({ user }) {
         </div>
 
       </div>
-
     </div>
   );
 }

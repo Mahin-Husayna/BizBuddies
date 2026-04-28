@@ -33,6 +33,7 @@ function Deals() {
     scrollRef.current?.scrollBy({ left: 300, behavior: "smooth" });
   };
 
+  // OPEN BUSINESS PAGE
   const openBusiness = (product) => {
     if (!product.business) return;
 
@@ -66,7 +67,7 @@ function Deals() {
   });
 
   return (
-    <div className="mt-8">
+    <div className="mt-8 px-2">
 
       {/* HEADER */}
       <div className="flex justify-between items-center mb-4">
@@ -77,14 +78,14 @@ function Deals() {
         <div className="flex gap-2">
           <button
             onClick={scrollLeft}
-            className="bg-white/70 px-3 py-1 rounded-lg shadow hover:scale-105"
+            className="bg-white shadow px-3 py-1 rounded-lg hover:scale-105 transition"
           >
             ◀
           </button>
 
           <button
             onClick={scrollRight}
-            className="bg-white/70 px-3 py-1 rounded-lg shadow hover:scale-105"
+            className="bg-white shadow px-3 py-1 rounded-lg hover:scale-105 transition"
           >
             ▶
           </button>
@@ -97,36 +98,36 @@ function Deals() {
           No deals available right now
         </p>
       ) : (
-        <div className="flex justify-center">
+        <div className="relative">
+
+          {/* SCROLL AREA */}
           <div
             ref={scrollRef}
-            className="flex gap-4 overflow-x-auto max-w-[750px] pb-2"
+            className="flex gap-5 overflow-x-auto scroll-smooth no-scrollbar py-2"
           >
             {deals.map((product) => (
               <div
                 key={product._id}
-                className="min-w-[230px] bg-white/70 p-4 rounded-xl shadow relative"
+                onClick={() => openBusiness(product)}
+                className="min-w-[240px] bg-white p-4 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
               >
 
-                {/* DISCOUNT BADGE */}
-                <span className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                {/* DISCOUNT */}
+                <span className="absolute bg-red-500 text-white text-xs px-2 py-1 rounded-full">
                   {product.discount}% OFF
                 </span>
 
                 <img
                   src={product.image || "https://via.placeholder.com/150"}
                   alt={product.name}
-                  className="w-full h-28 object-cover rounded-lg mb-3"
+                  className="w-full h-32 object-cover rounded-lg mb-3"
                 />
 
                 <h3 className="font-semibold text-sm">
                   {product.name}
                 </h3>
 
-                <p
-                  onClick={() => openBusiness(product)}
-                  className="text-xs text-gray-500 cursor-pointer hover:underline"
-                >
+                <p className="text-xs text-gray-500">
                   {product.seller}
                 </p>
 
@@ -136,7 +137,7 @@ function Deals() {
                     ৳{product.price}
                   </p>
 
-                  <p className="text-purple-600 font-bold">
+                  <p className="text-purple-600 font-bold text-lg">
                     ৳{Math.round(product.discountedPrice)}
                   </p>
                 </div>
@@ -159,6 +160,7 @@ function Deals() {
                   </p>
                 )}
 
+                
               </div>
             ))}
           </div>

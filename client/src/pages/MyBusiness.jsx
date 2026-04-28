@@ -116,6 +116,37 @@ function MyBusiness() {
                     ⏳ Waiting for admin approval
                   </p>
                 )}
+
+                {/* DELETE BUSINESS */}
+<button
+  onClick={async () => {
+    const confirmDelete = window.confirm(
+      "Are you sure? This will delete your business and ALL products."
+    );
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/business/${business._id}`,
+        { method: "DELETE" }
+      );
+
+      if (res.ok) {
+        toast.success("Business deleted successfully");
+        setBusiness(null);
+        setProducts([]);
+      } else {
+        toast.error("Failed to delete business");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Server error");
+    }
+  }}
+  className="mt-4 bg-red-500 text-white px-5 py-2 rounded-xl hover:bg-red-500 transition"
+>
+  Delete Profile
+</button>
               </div>
 
               {/* ========================= */}
