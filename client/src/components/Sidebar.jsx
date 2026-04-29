@@ -71,6 +71,7 @@ function Sidebar() {
           {navItem("/deals", "Deals", "🔥")}
           {navItem("/messages", "Messages", "💬", true)}
           {navItem("/events", "Events", "📅")}
+          {navItem("/orders", "Orders", "📦")}
         </ul>
       </div>
 

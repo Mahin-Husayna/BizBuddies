@@ -38,7 +38,6 @@ function BusinessProfile() {
         return;
       }
 
-      // 🔥 Get sellerId safely
       const sellerId =
         typeof business.owner === "object"
           ? business.owner._id
@@ -49,7 +48,6 @@ function BusinessProfile() {
         return;
       }
 
-      // 🔥 Create / get conversation
       const res = await fetch("http://localhost:5000/api/messages/start", {
         method: "POST",
         headers: {
@@ -64,13 +62,72 @@ function BusinessProfile() {
 
       const convo = await res.json();
 
-      // ✅ Redirect to messages page + open chat
       localStorage.setItem("activeChat", convo._id);
       navigate("/messages");
-
     } catch (err) {
       console.error(err);
       alert("Error starting chat");
+    }
+  };
+
+  // =========================
+  // 🛒 ADD TO CART
+  // =========================
+  const addToCart = async (productId) => {
+    try {
+      if (!user) {
+        alert("Login first");
+        return;
+      }
+
+      const res = await fetch("http://localhost:5000/api/cart/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user._id,
+          productId,
+        }),
+      });
+
+      if (!res.ok) {
+        alert("Failed to add to cart");
+        return;
+      }
+
+      alert("Added to cart");
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
+    }
+  };
+
+  // =========================
+  // 📦 REQUEST STOCK
+  // =========================
+  const requestStock = async (productId) => {
+    try {
+      if (!user) {
+        alert("Login first");
+        return;
+      }
+
+      await fetch("http://localhost:5000/api/cart/request-stock", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId,
+          userId: user._id,
+        }),
+      });
+
+      alert("Stock request sent");
+    } catch (err) {
+      console.error(err);
+      alert("Error requesting stock");
     }
   };
 
@@ -99,10 +156,8 @@ function BusinessProfile() {
 
           <div className="p-6">
 
-            {/* HEADER */}
             <div className="flex items-center justify-between flex-wrap gap-4">
 
-              {/* LEFT INFO */}
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 bg-purple-300 rounded-full flex items-center justify-center text-2xl">
                   🏪
@@ -123,17 +178,14 @@ function BusinessProfile() {
                 </div>
               </div>
 
-              {/* 💬 MESSAGE BUTTON */}
               <button
                 onClick={handleMessageSeller}
                 className="bg-purple-500 text-white px-5 py-2 rounded-lg hover:opacity-90 shadow"
               >
                 💬 Message Seller
               </button>
-
             </div>
 
-            {/* DESCRIPTION */}
             <p className="mt-4 text-gray-700">
               {business.description}
             </p>
@@ -199,6 +251,25 @@ function BusinessProfile() {
                       Limited Offer
                     </p>
                   )}
+
+                  {/* 🔥 ACTION BUTTONS */}
+                  <div className="mt-3">
+                    {product.stock > 0 ? (
+                      <button
+                        onClick={() => addToCart(product._id)}
+                        className="bg-purple-500 text-white text-xs px-3 py-1 rounded-lg hover:scale-105 transition"
+                      >
+                        Add to Cart
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => requestStock(product._id)}
+                        className="bg-orange-500 text-white text-xs px-3 py-1 rounded-lg hover:scale-105 transition"
+                      >
+                        Request Stock
+                      </button>
+                    )}
+                  </div>
 
                 </div>
               ))}

@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiSearch, FiBell, FiMessageCircle } from "react-icons/fi";
+import { FiSearch, FiBell, FiShoppingCart } from "react-icons/fi";
 import { io } from "socket.io-client";
+
 
 function Navbar({ user }) {
   const [query, setQuery] = useState("");
@@ -241,22 +242,15 @@ function Navbar({ user }) {
         </div>
 
         {/* 💬 MESSAGE */}
-        <div
-          className="relative cursor-pointer"
-          onClick={() => {
-            localStorage.setItem("msgCount", 0);
-            setUnreadMessages(0);
-            navigate("/messages");
-          }}
-        >
-          <FiMessageCircle className="text-lg" />
-
-          {unreadMessages > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-1.5 rounded-full">
-              {unreadMessages}
-            </span>
-          )}
+        <div>
+          {/* 🛒 CART ICON */}
+<FiShoppingCart
+  className="text-lg cursor-pointer"
+  onClick={() => navigate("/cart")}
+/>
         </div>
+
+
 
         {/* USER */}
         <div className="flex items-center gap-2">

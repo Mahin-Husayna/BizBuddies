@@ -7,6 +7,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 
 const app = express();
+const cartRoutes = require("./routes/cartRoutes");
 
 // ================= MIDDLEWARE =================
 app.use(cors({ origin: "*" }));
@@ -40,6 +41,8 @@ app.use("/api/search", require("./routes/searchRoutes"));
 app.use("/api/announcements", require("./routes/announcementRoutes"));
 app.use("/api/notifications", require("./routes/notificationRoutes"));
 app.use("/api/messages", require("./routes/messageRoutes"));
+app.use("/api/cart", cartRoutes);
+app.use("/api/orders", require("./routes/orderRoutes"));
 
 // ================= SOCKET.IO SETUP =================
 const server = http.createServer(app);
@@ -99,6 +102,8 @@ app.use((err, req, res, next) => {
 
 // ================= START SERVER =================
 const PORT = process.env.PORT || 5000;
+
+
 
 server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

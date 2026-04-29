@@ -16,6 +16,8 @@ import Chat from "./pages/Chat";
 import BusinessDetails from "./pages/BusinessDetails";
 import AdminDashboard from "./pages/AdminDashboard";
 import Notifications from "./pages/Notifications";
+import Cart from "./pages/Cart";
+import Orders from "./pages/Orders";
 
 
 function App() {
@@ -39,6 +41,8 @@ function App() {
       <Route path="/business/:id" element={<BusinessProfile />} />
       <Route path="/search" element={<Search />} />
       <Route path="/edit-product/:id" element={<EditProduct />} />
+      <Route path="/cart" element={<Cart />} />
+      <Route path="/orders" element={<Orders />} />
       </Routes>
     </Router>
   );

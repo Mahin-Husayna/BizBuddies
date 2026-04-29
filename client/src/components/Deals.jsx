@@ -8,7 +8,11 @@ function Deals() {
   const scrollRef = useRef(null);
   const navigate = useNavigate();
 
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  // =========================
   // FETCH PRODUCTS
+  // =========================
   useEffect(() => {
     fetch("http://localhost:5000/api/products")
       .then((res) => res.json())
@@ -16,7 +20,9 @@ function Deals() {
       .catch((err) => console.error(err));
   }, []);
 
+  // =========================
   // TIMER REFRESH
+  // =========================
   useEffect(() => {
     const timer = setInterval(() => {
       setNow(new Date());
@@ -33,7 +39,9 @@ function Deals() {
     scrollRef.current?.scrollBy({ left: 300, behavior: "smooth" });
   };
 
+  // =========================
   // OPEN BUSINESS PAGE
+  // =========================
   const openBusiness = (product) => {
     if (!product.business) return;
 
@@ -43,6 +51,46 @@ function Deals() {
         : product.business;
 
     navigate(`/business/${id}`);
+  };
+
+  // =========================
+  // ADD TO CART
+  // =========================
+  const addToCart = async (productId) => {
+    try {
+      await fetch("http://localhost:5000/api/cart/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user._id,
+          productId,
+        }),
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // =========================
+  // REQUEST STOCK
+  // =========================
+  const requestStock = async (productId) => {
+    try {
+      await fetch("http://localhost:5000/api/cart/request-stock", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId,
+          userId: user._id,
+        }),
+      });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const getRemainingTime = (endTime) => {
@@ -59,7 +107,9 @@ function Deals() {
     return `${hours}h ${minutes}m ${seconds}s`;
   };
 
+  // =========================
   // FILTER DEALS
+  // =========================
   const deals = products.filter((p) => {
     if (!p.discount || p.discount <= 0) return false;
     if (!p.offerEndsAt) return true;
@@ -160,7 +210,31 @@ function Deals() {
                   </p>
                 )}
 
-                
+                {/* 🔥 CART ACTIONS */}
+                <div className="mt-3 flex gap-2">
+                  {product.stock > 0 ? (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addToCart(product._id);
+                      }}
+                      className="bg-purple-500 text-white text-xs px-3 py-1 rounded-lg hover:scale-105 transition"
+                    >
+                      Add to Cart
+                    </button>
+                  ) : (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        requestStock(product._id);
+                      }}
+                      className="bg-orange-500 text-white text-xs px-3 py-1 rounded-lg hover:scale-105 transition"
+                    >
+                      Request Stock
+                    </button>
+                  )}
+                </div>
+
               </div>
             ))}
           </div>
