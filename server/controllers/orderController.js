@@ -10,7 +10,9 @@ exports.createOrder = async (req, res) => {
   try {
     const {
       userId,
+      deliveryType,
       deliveryAddress,
+      deliveryTime,
       paymentMethod,
       coordinates,
     } = req.body;
@@ -21,9 +23,7 @@ exports.createOrder = async (req, res) => {
     }
 
     if (!deliveryAddress || !deliveryAddress.trim()) {
-      return res
-        .status(400)
-        .json({ message: "Delivery address is required" });
+      return res.status(400).json({ message: "Delivery address is required" });
     }
 
     // =========================
@@ -79,12 +79,17 @@ exports.createOrder = async (req, res) => {
       business: business._id,
       items,
       totalAmount,
-      deliveryAddress,
 
-      // ✅ NEW FEATURES (SAFE ADD)
+      // ✅ DELIVERY SYSTEM
+      deliveryType: deliveryType || "custom",
+      deliveryAddress,
+      deliveryTime: deliveryTime || "",
+
+      // ✅ PAYMENT + MAP
       paymentMethod: paymentMethod || "cod",
       coordinates: coordinates || null,
 
+      // 🔥 ADVANCED STATUS FLOW
       status: "pending",
     });
 
@@ -178,7 +183,14 @@ exports.updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
 
-    if (!["pending", "delivered"].includes(status)) {
+    const allowedStatuses = [
+      "pending",
+      "processing",
+      "out_for_delivery",
+      "delivered",
+    ];
+
+    if (!allowedStatuses.includes(status)) {
       return res.status(400).json({ message: "Invalid order status" });
     }
 

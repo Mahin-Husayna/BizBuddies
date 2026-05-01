@@ -39,39 +39,49 @@ const orderSchema = new mongoose.Schema(
       default: 0,
     },
 
-    // 🔥 NEW (safe addition)
+    // ✅ DELIVERY TYPE (kept)
     deliveryType: {
       type: String,
       enum: ["campus", "custom"],
       default: "custom",
     },
 
+    // ✅ ADDRESS (kept)
     deliveryAddress: {
       type: String,
       required: true,
     },
 
-    // 🔥 NEW (only used for campus)
+    // ✅ CAMPUS DELIVERY TIME (kept)
     deliveryTime: {
       type: String,
       default: "",
     },
 
+    // 🔥 UPDATED STATUS FLOW (IMPORTANT)
     status: {
       type: String,
-      enum: ["pending", "delivered"],
+      enum: [
+        "pending",
+        "processing",
+        "out_for_delivery",
+        "delivered",
+      ],
       default: "pending",
     },
-    paymentMethod: {
-  type: String,
-  enum: ["cod", "online"],
-  default: "cod",
-},
 
-coordinates: {
-  lat: Number,
-  lng: Number,
-},
+    // ✅ PAYMENT (kept)
+    paymentMethod: {
+      type: String,
+      enum: ["cod", "online"],
+      default: "cod",
+    },
+
+    // ✅ MAP COORDINATES (kept)
+    coordinates: {
+      lat: Number,
+      lng: Number,
+    },
   },
   { timestamps: true }
 );

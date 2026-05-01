@@ -8,6 +8,16 @@ function SellerDashboard() {
   const user = JSON.parse(localStorage.getItem("user"));
   const business = JSON.parse(localStorage.getItem("business"));
 
+  // 🔥 NEW STATUS FLOW
+  const statusFlow = ["pending", "processing", "out_for_delivery", "delivered"];
+
+  const statusLabels = {
+    pending: "Pending",
+    processing: "Processing",
+    out_for_delivery: "Out for Delivery",
+    delivered: "Delivered",
+  };
+
   // =========================
   // FETCH ORDERS
   // =========================
@@ -20,26 +30,32 @@ function SellerDashboard() {
       .catch((err) => console.error(err));
   }, [business]);
 
-  // =========================
-  // MARK DELIVERED
-  // =========================
-  const markDelivered = async (orderId) => {
-    await fetch(
+  // 🔥 GET NEXT STATUS
+  const getNextStatus = (current) => {
+    const index = statusFlow.indexOf(current);
+    return statusFlow[index + 1] || null;
+  };
+
+  // 🔥 UPDATE STATUS
+  const updateStatus = async (orderId, nextStatus) => {
+    const res = await fetch(
       `http://localhost:5000/api/orders/status/${orderId}`,
       {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ status: "delivered" }),
+        body: JSON.stringify({ status: nextStatus }),
       }
     );
 
-    setOrders((prev) =>
-      prev.map((o) =>
-        o._id === orderId ? { ...o, status: "delivered" } : o
-      )
-    );
+    const updated = await res.json();
+
+    if (res.ok) {
+      setOrders((prev) =>
+        prev.map((o) => (o._id === orderId ? updated : o))
+      );
+    }
   };
 
   return (
@@ -65,77 +81,91 @@ function SellerDashboard() {
           ) : (
             <div className="space-y-4">
 
-              {orders.map((order) => (
-                <div
-                  key={order._id}
-                  className="bg-white/80 p-5 rounded-xl shadow-md hover:shadow-lg transition"
-                >
+              {orders.map((order) => {
+                const nextStatus = getNextStatus(order.status);
 
-                  {/* TOP ROW */}
-                  <div className="flex justify-between items-start">
+                return (
+                  <div
+                    key={order._id}
+                    className="bg-white/80 p-5 rounded-xl shadow-md hover:shadow-lg transition"
+                  >
 
-                    {/* LEFT SIDE */}
-                    <div>
+                    {/* TOP ROW */}
+                    <div className="flex justify-between items-start">
 
-                      {/* STATUS */}
-                      <span
-                        className={`px-3 py-1 text-xs rounded-full font-medium
-                          ${
-                            order.status === "pending"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : "bg-green-100 text-green-700"
-                          }`}
-                      >
-                        {order.status.toUpperCase()}
-                      </span>
+                      {/* LEFT SIDE */}
+                      <div>
 
-                      {/* PRODUCTS */}
-                      <div className="mt-2 text-sm text-gray-700 space-y-1">
-                        {order.items.map((item, index) => (
-                          <p key={index}>
-                            {item.product?.name} × {item.quantity}
+                        {/* STATUS BADGE */}
+                        <span
+                          className={`px-3 py-1 text-xs rounded-full font-medium
+                            ${
+                              order.status === "delivered"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-yellow-100 text-yellow-700"
+                            }`}
+                        >
+                          {statusLabels[order.status]}
+                        </span>
+
+                        {/* PRODUCTS */}
+                        <div className="mt-2 text-sm text-gray-700 space-y-1">
+                          {order.items.map((item, index) => (
+                            <p key={index}>
+                              {item.product?.name} × {item.quantity}
+                            </p>
+                          ))}
+                        </div>
+
+                        {/* ADDRESS */}
+                        <p className="mt-2 text-sm text-gray-600">
+                          📍 {order.deliveryAddress}
+                        </p>
+
+                        {/* DELIVERY TIME */}
+                        {order.deliveryType === "campus" && order.deliveryTime && (
+                          <p className="text-xs text-gray-500">
+                            🕒 {order.deliveryTime}
                           </p>
-                        ))}
+                        )}
+
+                        {/* PAYMENT */}
+                        <p className="text-xs text-gray-500 mt-1">
+                          💳{" "}
+                          {order.paymentMethod === "cod"
+                            ? "Cash on Delivery"
+                            : "Online Payment"}
+                        </p>
+
                       </div>
 
-                      {/* ADDRESS */}
-                      <p className="mt-2 text-sm text-gray-600">
-                        📍 {order.deliveryAddress}
-                      </p>
+                      {/* RIGHT SIDE */}
+                      <div className="flex flex-col items-end gap-3">
 
-                      {/* DELIVERY TIME (only for campus) */}
-                      {order.deliveryType === "campus" && order.deliveryTime && (
-                        <p className="text-xs text-gray-500">
-                          🕒 {order.deliveryTime}
-                        </p>
-                      )}
+                        {/* TOTAL */}
+                        <span className="text-purple-600 font-bold text-lg">
+                          ৳{Math.round(order.totalAmount)}
+                        </span>
 
-                    </div>
+                        {/* 🔥 SMART BUTTON */}
+                        {nextStatus && (
+                          <button
+                            onClick={() =>
+                              updateStatus(order._id, nextStatus)
+                            }
+                            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm transition"
+                          >
+                            Mark {statusLabels[nextStatus]}
+                          </button>
+                        )}
 
-                    {/* RIGHT SIDE */}
-                    <div className="flex flex-col items-end gap-3">
-
-                      {/* TOTAL */}
-                      <span className="text-purple-600 font-bold text-lg">
-                        ৳{Math.round(order.totalAmount)}
-                      </span>
-
-                      {/* BUTTON */}
-                      {order.status === "pending" && (
-                        <button
-                          onClick={() => markDelivered(order._id)}
-                          className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm transition"
-                        >
-                          Mark Delivered
-                        </button>
-                      )}
+                      </div>
 
                     </div>
 
                   </div>
-
-                </div>
-              ))}
+                );
+              })}
 
             </div>
           )}

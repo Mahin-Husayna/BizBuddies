@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 
@@ -7,11 +8,26 @@ function Orders() {
 
   const user = JSON.parse(localStorage.getItem("user"));
 
+  // 🔥 STATUS FLOW
+  const statusFlow = ["pending", "processing", "out_for_delivery", "delivered"];
+
+  const statusLabels = {
+    pending: "Pending",
+    processing: "Processing",
+    out_for_delivery: "Out for Delivery",
+    delivered: "Delivered",
+  };
+
   useEffect(() => {
     fetch(`http://localhost:5000/api/orders/${user._id}`)
       .then((res) => res.json())
-      .then(setOrders);
-  }, []);
+      .then(setOrders)
+      .catch((err) => console.error(err));
+  }, [user]);
+
+  const getStatusIndex = (status) => {
+    return statusFlow.indexOf(status);
+  };
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-purple-200 via-blue-200 to-pink-200">
@@ -27,8 +43,8 @@ function Orders() {
             <p>No orders yet</p>
           ) : (
             orders.map((order) => {
-              const business =
-                order.items[0]?.product?.business;
+              const business = order.items[0]?.product?.business;
+              const currentIndex = getStatusIndex(order.status);
 
               return (
                 <div
@@ -54,7 +70,7 @@ function Orders() {
                       </h2>
 
                       <p className="text-sm text-gray-500">
-                        Status: {order.status}
+                        Status: {statusLabels[order.status]}
                       </p>
 
                       <p className="text-xs text-gray-400">
@@ -66,6 +82,13 @@ function Orders() {
                     <div className="text-right">
                       <p className="text-purple-600 font-bold text-lg">
                         ৳{Math.round(order.totalAmount)}
+                      </p>
+
+                      {/* 💳 PAYMENT */}
+                      <p className="text-xs text-gray-500">
+                        {order.paymentMethod === "cod"
+                          ? "Cash on Delivery"
+                          : "Online Payment"}
                       </p>
                     </div>
                   </div>
@@ -87,6 +110,78 @@ function Orders() {
                       </div>
                     ))}
                   </div>
+
+                  {/* 📍 DELIVERY */}
+                  <div className="mt-4 bg-purple-50 p-3 rounded-xl text-sm text-gray-700">
+                    <p>📍 {order.deliveryAddress}</p>
+
+                    {order.deliveryType === "campus" && order.deliveryTime && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        🕒 {order.deliveryTime}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* 🚀 STATUS TRACKER */}
+                  <div className="mt-5">
+                    <div className="flex justify-between items-center">
+                      {statusFlow.map((status, index) => (
+                        <div
+                          key={status}
+                          className="flex flex-col items-center flex-1"
+                        >
+                          <div
+                            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+                              index <= currentIndex
+                                ? "bg-purple-500 text-white"
+                                : "bg-gray-200 text-gray-500"
+                            }`}
+                          >
+                            {index + 1}
+                          </div>
+
+                          <p
+                            className={`text-[11px] mt-1 text-center ${
+                              index <= currentIndex
+                                ? "text-purple-600 font-medium"
+                                : "text-gray-400"
+                            }`}
+                          >
+                            {statusLabels[status]}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 🗺️ MAP (ONLY IF CUSTOM LOCATION) */}
+                  {order.coordinates?.lat && order.coordinates?.lng && (
+                    <div className="mt-5 overflow-hidden rounded-xl">
+                      <MapContainer
+                        center={[
+                          order.coordinates.lat,
+                          order.coordinates.lng,
+                        ]}
+                        zoom={15}
+                        style={{ height: "220px", width: "100%" }}
+                        dragging={false}
+                        scrollWheelZoom={false}
+                        doubleClickZoom={false}
+                        zoomControl={false}
+                      >
+                        <TileLayer
+                          attribution="&copy; OpenStreetMap contributors"
+                          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        />
+                        <Marker
+                          position={[
+                            order.coordinates.lat,
+                            order.coordinates.lng,
+                          ]}
+                        />
+                      </MapContainer>
+                    </div>
+                  )}
 
                 </div>
               );
