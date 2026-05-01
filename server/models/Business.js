@@ -32,6 +32,18 @@ const businessSchema = new mongoose.Schema({
     default: "",
   },
 
+  
+
+averageRating: {
+  type: Number,
+  default: 0,
+},
+
+totalReviews: {
+  type: Number,
+  default: 0,
+},
+
   status: {
     type: String,
     enum: ["pending", "approved", "rejected", "banned"],

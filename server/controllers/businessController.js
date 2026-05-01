@@ -169,14 +169,12 @@ exports.approveBusiness = async (req, res) => {
 
     const message = `🎉 Your business "${business.name}" has been approved!`;
 
-    // Save notification
     await Notification.create({
       user: business.owner,
       message,
       type: "business",
     });
 
-    // 🔴 REALTIME
     sendRealtimeNotification(req, business.owner.toString(), message);
 
     res.json(business);
@@ -252,5 +250,23 @@ exports.deleteBusiness = async (req, res) => {
     res.json({ message: "Business deleted" });
   } catch (error) {
     res.status(500).json({ message: "Error deleting business" });
+  }
+};
+
+// =========================
+// 🏆 LEADERBOARD (NEW FEATURE)
+// =========================
+exports.getLeaderboard = async (req, res) => {
+  try {
+    const businesses = await Business.find({
+      status: "approved",
+    })
+      .sort({ rating: -1, totalReviews: -1 })
+      .limit(5);
+
+    res.json(businesses);
+  } catch (err) {
+    console.error("LEADERBOARD ERROR:", err);
+    res.status(500).json({ message: "Error fetching leaderboard" });
   }
 };

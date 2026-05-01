@@ -15,9 +15,13 @@ router.put("/admin/ban/:id", businessController.banBusiness);
 router.post("/", upload.single("coverImage"), businessController.createBusiness);
 
 // 🔥 ORDER MATTERS HERE
-router.get("/single/:id", businessController.getBusinessById);   // ✅ FIRST
-router.get("/user/:userId", businessController.getBusinessByUser); // ✅ CLEAN URL
+router.get("/single/:id", businessController.getBusinessById);
+router.get("/user/:userId", businessController.getBusinessByUser);
 router.get("/", businessController.getAllBusinesses);
+
+// ✅ FIXED LEADERBOARD ROUTE
+router.get("/leaderboard", businessController.getLeaderboard);
+
 router.delete("/:id", businessController.deleteBusiness);
 
 module.exports = router;

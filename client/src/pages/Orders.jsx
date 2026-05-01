@@ -6,9 +6,13 @@ import Navbar from "../components/Navbar";
 function Orders() {
   const [orders, setOrders] = useState([]);
 
+  // 🔥 REVIEW STATES
+  const [activeReview, setActiveReview] = useState(null);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // 🔥 STATUS FLOW
   const statusFlow = ["pending", "processing", "out_for_delivery", "delivered"];
 
   const statusLabels = {
@@ -27,6 +31,32 @@ function Orders() {
 
   const getStatusIndex = (status) => {
     return statusFlow.indexOf(status);
+  };
+
+  // 🔥 SUBMIT REVIEW
+  const submitReview = async () => {
+    if (!rating) {
+      alert("Please select a rating");
+      return;
+    }
+
+    await fetch("http://localhost:5000/api/reviews", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: user._id,
+        orderId: activeReview._id,
+        rating,
+        comment,
+      }),
+    });
+
+    alert("Review submitted!");
+    setActiveReview(null);
+    setRating(0);
+    setComment("");
   };
 
   return (
@@ -51,10 +81,8 @@ function Orders() {
                   key={order._id}
                   className="mb-6 p-5 bg-white rounded-xl shadow"
                 >
-                  {/* 🔝 TOP SECTION */}
+                  {/* 🔝 TOP */}
                   <div className="flex items-center gap-4 mb-4">
-
-                    {/* 🏪 BUSINESS IMAGE */}
                     <img
                       src={
                         business?.coverImage ||
@@ -63,7 +91,6 @@ function Orders() {
                       className="w-20 h-20 object-cover rounded-lg"
                     />
 
-                    {/* DETAILS */}
                     <div className="flex-1">
                       <h2 className="font-bold text-lg">
                         {business?.name || "Unknown Business"}
@@ -78,13 +105,11 @@ function Orders() {
                       </p>
                     </div>
 
-                    {/* 💰 PRICE */}
                     <div className="text-right">
                       <p className="text-purple-600 font-bold text-lg">
                         ৳{Math.round(order.totalAmount)}
                       </p>
 
-                      {/* 💳 PAYMENT */}
                       <p className="text-xs text-gray-500">
                         {order.paymentMethod === "cod"
                           ? "Cash on Delivery"
@@ -93,7 +118,7 @@ function Orders() {
                     </div>
                   </div>
 
-                  {/* 🧾 PRODUCT LIST */}
+                  {/* PRODUCTS */}
                   <div className="border-t pt-3 space-y-1">
                     {order.items.map((item) => (
                       <div
@@ -111,18 +136,19 @@ function Orders() {
                     ))}
                   </div>
 
-                  {/* 📍 DELIVERY */}
+                  {/* DELIVERY */}
                   <div className="mt-4 bg-purple-50 p-3 rounded-xl text-sm text-gray-700">
                     <p>📍 {order.deliveryAddress}</p>
 
-                    {order.deliveryType === "campus" && order.deliveryTime && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        🕒 {order.deliveryTime}
-                      </p>
-                    )}
+                    {order.deliveryType === "campus" &&
+                      order.deliveryTime && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          🕒 {order.deliveryTime}
+                        </p>
+                      )}
                   </div>
 
-                  {/* 🚀 STATUS TRACKER */}
+                  {/* STATUS TRACKER */}
                   <div className="mt-5">
                     <div className="flex justify-between items-center">
                       {statusFlow.map((status, index) => (
@@ -154,7 +180,17 @@ function Orders() {
                     </div>
                   </div>
 
-                  {/* 🗺️ MAP (ONLY IF CUSTOM LOCATION) */}
+                  {/* 🔥 REVIEW BUTTON */}
+                  {order.status === "delivered" && (
+                    <button
+                      onClick={() => setActiveReview(order)}
+                      className="mt-4 bg-purple-500 text-white px-4 py-1 rounded text-sm"
+                    >
+                      Leave Review
+                    </button>
+                  )}
+
+                  {/* MAP */}
                   {order.coordinates?.lat && order.coordinates?.lng && (
                     <div className="mt-5 overflow-hidden rounded-xl">
                       <MapContainer
@@ -182,13 +218,58 @@ function Orders() {
                       </MapContainer>
                     </div>
                   )}
-
                 </div>
               );
             })
           )}
         </div>
       </div>
+
+      {/* 🔥 REVIEW MODAL */}
+      {activeReview && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-xl w-80">
+
+            <h2 className="text-lg font-bold mb-3">Leave Review</h2>
+
+            <div className="flex gap-1 mb-3">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <span
+                  key={star}
+                  onClick={() => setRating(star)}
+                  className={`text-2xl cursor-pointer ${
+                    star <= rating ? "text-yellow-400" : "text-gray-300"
+                  }`}
+                >
+                  ★
+                </span>
+              ))}
+            </div>
+
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              className="w-full border p-2 rounded text-sm"
+              placeholder="Write your review..."
+            />
+
+            <button
+              onClick={submitReview}
+              className="mt-3 w-full bg-purple-500 text-white py-2 rounded"
+            >
+              Submit
+            </button>
+
+            <button
+              onClick={() => setActiveReview(null)}
+              className="mt-2 w-full text-gray-500 text-sm"
+            >
+              Cancel
+            </button>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }

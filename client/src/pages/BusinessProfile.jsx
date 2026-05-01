@@ -10,6 +10,7 @@ function BusinessProfile() {
 
   const [business, setBusiness] = useState(null);
   const [products, setProducts] = useState([]);
+  const [reviews, setReviews] = useState([]); // 🔥 NEW
 
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -25,6 +26,12 @@ function BusinessProfile() {
     fetch(`http://localhost:5000/api/products/business/${id}`)
       .then((res) => res.json())
       .then((data) => setProducts(data))
+      .catch((err) => console.error(err));
+
+    // 🔥 FETCH REVIEWS
+    fetch(`http://localhost:5000/api/reviews/${id}`)
+      .then((res) => res.json())
+      .then(setReviews)
       .catch((err) => console.error(err));
   }, [id]);
 
@@ -136,19 +143,15 @@ function BusinessProfile() {
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-purple-200 via-blue-200 to-pink-200">
 
-      {/* SIDEBAR */}
       <Sidebar />
 
-      {/* MAIN CONTENT */}
       <div className="flex-1 p-6">
 
-        {/* NAVBAR */}
         <Navbar user={user} />
 
         {/* BUSINESS CARD */}
         <div className="bg-white/50 backdrop-blur-xl rounded-2xl shadow-lg overflow-hidden mt-4">
 
-          {/* COVER */}
           <img
             src={business.coverImage || "https://via.placeholder.com/800x300"}
             className="w-full h-64 object-cover"
@@ -174,6 +177,11 @@ function BusinessProfile() {
 
                   <p className="text-gray-700 text-sm mt-2">
                     👤 {business.ownerName}
+                  </p>
+
+                  {/* ⭐ RATING */}
+                  <p className="text-yellow-500 mt-1">
+                    ⭐ {business.averageRating?.toFixed(1) || 0} ({business.totalReviews || 0})
                   </p>
                 </div>
               </div>
@@ -252,7 +260,7 @@ function BusinessProfile() {
                     </p>
                   )}
 
-                  {/* 🔥 ACTION BUTTONS */}
+                  {/* ACTION */}
                   <div className="mt-3">
                     {product.stock > 0 ? (
                       <button
@@ -275,6 +283,28 @@ function BusinessProfile() {
               ))}
 
             </div>
+          )}
+        </div>
+
+        {/* 🔥 REVIEWS SECTION */}
+        <div className="mt-10">
+          <h2 className="text-xl font-semibold mb-4">
+            Customer Reviews
+          </h2>
+
+          {reviews.length === 0 ? (
+            <p>No reviews yet</p>
+          ) : (
+            reviews.map((r) => (
+              <div
+                key={r._id}
+                className="bg-white p-4 rounded-xl shadow mb-3"
+              >
+                <p className="font-semibold">{r.user.name}</p>
+                <p className="text-yellow-500">⭐ {r.rating}</p>
+                <p className="text-sm text-gray-600">{r.comment}</p>
+              </div>
+            ))
           )}
         </div>
 

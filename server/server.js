@@ -43,6 +43,7 @@ app.use("/api/notifications", require("./routes/notificationRoutes"));
 app.use("/api/messages", require("./routes/messageRoutes"));
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", require("./routes/orderRoutes"));
+app.use("/api/reviews", require("./routes/reviewRoutes"));
 
 // ================= SOCKET.IO SETUP =================
 const server = http.createServer(app);
