@@ -5,6 +5,13 @@ const orderSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
+    },
+
+    business: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Business",
+      required: true,
     },
 
     items: [
@@ -12,19 +19,59 @@ const orderSchema = new mongoose.Schema(
         product: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
+          required: true,
         },
-        quantity: Number,
-        price: Number,
+        quantity: {
+          type: Number,
+          required: true,
+          default: 1,
+        },
+        price: {
+          type: Number,
+          required: true,
+        },
       },
     ],
 
-    totalAmount: Number,
+    totalAmount: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+
+    // 🔥 NEW (safe addition)
+    deliveryType: {
+      type: String,
+      enum: ["campus", "custom"],
+      default: "custom",
+    },
+
+    deliveryAddress: {
+      type: String,
+      required: true,
+    },
+
+    // 🔥 NEW (only used for campus)
+    deliveryTime: {
+      type: String,
+      default: "",
+    },
 
     status: {
       type: String,
-      enum: ["pending", "accepted", "completed"],
+      enum: ["pending", "delivered"],
       default: "pending",
     },
+    paymentMethod: {
+  type: String,
+  enum: ["cod", "online"],
+  default: "cod",
+},
+
+coordinates: {
+  lat: Number,
+  lng: Number,
+},
   },
   { timestamps: true }
 );

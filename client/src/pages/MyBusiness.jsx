@@ -15,11 +15,11 @@ function MyBusiness() {
   useEffect(() => {
     if (!user || !user._id) return;
 
-    // ✅ FIXED API ROUTE (IMPORTANT)
     fetch(`http://localhost:5000/api/business/user/${user._id}`)
       .then((res) => res.json())
       .then((data) => {
         setBusiness(data);
+        localStorage.setItem("business", JSON.stringify(data));
 
         if (data && data._id) {
           fetch(
@@ -39,9 +39,7 @@ function MyBusiness() {
     try {
       const res = await fetch(
         `http://localhost:5000/api/products/${id}`,
-        {
-          method: "DELETE",
-        }
+        { method: "DELETE" }
       );
 
       if (res.ok) {
@@ -58,20 +56,16 @@ function MyBusiness() {
 
       <div className="flex gap-4">
 
-        {/* ✅ SIDEBAR ALWAYS VISIBLE */}
+        {/* SIDEBAR */}
         <Sidebar />
 
         <div className="flex-1 bg-white/40 backdrop-blur-xl p-6 rounded-2xl">
 
-          {/* ✅ NAVBAR ALWAYS VISIBLE */}
+          {/* NAVBAR */}
           <Navbar user={user} />
 
-          {/* ========================= */}
-          {/* 🔴 NO BUSINESS STATE */}
-          {/* ========================= */}
           {!business || business.message ? (
             <div className="flex flex-col items-center justify-center mt-20">
-
               <p className="text-gray-600 text-lg">
                 No business found or waiting for admin approval...
               </p>
@@ -82,15 +76,30 @@ function MyBusiness() {
               >
                 Create Business
               </button>
-
             </div>
           ) : (
             <>
-              {/* ========================= */}
-              {/* 🟢 BUSINESS CARD */}
-              {/* ========================= */}
+              {/* ================= ACTION BUTTONS (FIXED POSITION) ================= */}
+              <div className="flex justify-end gap-2 mb-3">
+                <button
+                  onClick={() => navigate("/seller-dashboard")}
+                  className="bg-white border border-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-100 transition shadow-sm"
+                >
+                  📊 Dashboard
+                </button>
+
+                <button
+                  onClick={() => navigate("/insights")}
+                  className="bg-white border border-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-100 transition shadow-sm"
+                >
+                  📈 Insights
+                </button>
+              </div>
+
+              {/* ================= BUSINESS CARD ================= */}
               <div className="bg-white/80 p-6 rounded-2xl shadow mb-6">
 
+                {/* COVER */}
                 {business.coverImage && (
                   <img
                     src={business.coverImage}
@@ -118,40 +127,39 @@ function MyBusiness() {
                 )}
 
                 {/* DELETE BUSINESS */}
-<button
-  onClick={async () => {
-    const confirmDelete = window.confirm(
-      "Are you sure? This will delete your business and ALL products."
-    );
-    if (!confirmDelete) return;
+                <button
+                  onClick={async () => {
+                    const confirmDelete = window.confirm(
+                      "Are you sure? This will delete your business and ALL products."
+                    );
+                    if (!confirmDelete) return;
 
-    try {
-      const res = await fetch(
-        `http://localhost:5000/api/business/${business._id}`,
-        { method: "DELETE" }
-      );
+                    try {
+                      const res = await fetch(
+                        `http://localhost:5000/api/business/${business._id}`,
+                        { method: "DELETE" }
+                      );
 
-      if (res.ok) {
-        toast.success("Business deleted successfully");
-        setBusiness(null);
-        setProducts([]);
-      } else {
-        toast.error("Failed to delete business");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Server error");
-    }
-  }}
-  className="mt-4 bg-red-500 text-white px-5 py-2 rounded-xl hover:bg-red-500 transition"
->
-  Delete Profile
-</button>
+                      if (res.ok) {
+                        toast.success("Business deleted successfully");
+                        setBusiness(null);
+                        setProducts([]);
+                      } else {
+                        toast.error("Failed to delete business");
+                      }
+                    } catch (err) {
+                      console.error(err);
+                      toast.error("Server error");
+                    }
+                  }}
+                  className="mt-4 bg-red-500 text-white px-5 py-2 rounded-xl hover:bg-red-600 transition"
+                >
+                  Delete Profile
+                </button>
+
               </div>
 
-              {/* ========================= */}
-              {/* 🔥 FIXED ADD PRODUCT BUTTON */}
-              {/* ========================= */}
+              {/* ADD PRODUCT */}
               {business.status === "approved" && (
                 <button
                   onClick={() =>
@@ -165,9 +173,7 @@ function MyBusiness() {
                 </button>
               )}
 
-              {/* ========================= */}
-              {/* 🟣 PRODUCTS */}
-              {/* ========================= */}
+              {/* PRODUCTS */}
               <h2 className="text-xl font-semibold mb-4">
                 Your Products
               </h2>
@@ -202,7 +208,7 @@ function MyBusiness() {
                         {p.name}
                       </h3>
 
-                      {/* PRICE / DISCOUNT */}
+                      {/* PRICE */}
                       {p.discount > 0 ? (
                         <>
                           <p className="text-xs line-through text-gray-400">

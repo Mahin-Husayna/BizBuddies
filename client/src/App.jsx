@@ -18,6 +18,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Notifications from "./pages/Notifications";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
+import SellerDashboard from "./pages/SellerDashboard";
+import Insights from "./pages/Insights";
 
 
 function App() {
@@ -43,6 +45,8 @@ function App() {
       <Route path="/edit-product/:id" element={<EditProduct />} />
       <Route path="/cart" element={<Cart />} />
       <Route path="/orders" element={<Orders />} />
+      <Route path="/seller-dashboard" element={<SellerDashboard />} />
+      <Route path="/insights" element={<Insights />} />
       </Routes>
     </Router>
   );
