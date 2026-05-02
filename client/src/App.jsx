@@ -12,6 +12,7 @@ import Search from "./pages/Search";
 import EditProduct from "./pages/EditProduct";
 import Messages from "./pages/Messages";
 import Chat from "./pages/Chat";
+import DealsPage from "./pages/DealsPage";
 
 import BusinessDetails from "./pages/BusinessDetails";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -20,6 +21,7 @@ import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import SellerDashboard from "./pages/SellerDashboard";
 import Insights from "./pages/Insights";
+import CreateAnnouncement from "./pages/CreateAnnouncement";
 
 
 function App() {
@@ -33,6 +35,7 @@ function App() {
         <Route path="/messages" element={<Messages />} />
         <Route path="/chat/:id" element={<Chat />} />
         <Route path="/notifications" element={<Notifications />} />
+        <Route path="/deals" element={<DealsPage />} />
 
 
 
@@ -47,6 +50,7 @@ function App() {
       <Route path="/orders" element={<Orders />} />
       <Route path="/seller-dashboard" element={<SellerDashboard />} />
       <Route path="/insights" element={<Insights />} />
+      <Route path="/create-announcement" element={<CreateAnnouncement />} />
       </Routes>
     </Router>
   );

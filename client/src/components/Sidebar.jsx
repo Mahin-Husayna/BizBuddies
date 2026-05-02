@@ -70,7 +70,6 @@ function Sidebar() {
           {navItem("/my-business", "My Business", "🏪")}
           {navItem("/deals", "Deals", "🔥")}
           {navItem("/messages", "Messages", "💬", true)}
-          {navItem("/events", "Events", "📅")}
           {navItem("/orders", "Orders", "📦")}
         </ul>
       </div>

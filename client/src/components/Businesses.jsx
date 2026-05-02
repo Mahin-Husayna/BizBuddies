@@ -13,25 +13,23 @@ function Businesses() {
       .catch((err) => console.error(err));
   }, []);
 
-  // 🔁 Scroll functions
   const scrollLeft = () => {
-    scrollRef.current?.scrollBy({ left: -300, behavior: "smooth" });
+    scrollRef.current?.scrollBy({ left: -280, behavior: "smooth" });
   };
 
   const scrollRight = () => {
-    scrollRef.current?.scrollBy({ left: 300, behavior: "smooth" });
+    scrollRef.current?.scrollBy({ left: 280, behavior: "smooth" });
   };
 
   return (
     <div className="mt-8">
 
-      {/* HEADER */}
+      {/* HEADER (simple like before) */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold text-gray-800">
           Business Profiles
         </h2>
 
-        {/* ARROWS */}
         <div className="flex gap-2">
           <button
             onClick={scrollLeft}
@@ -49,50 +47,68 @@ function Businesses() {
         </div>
       </div>
 
-      {/* CENTER WRAPPER */}
+      {/* SCROLL AREA */}
       <div className="flex justify-center">
-
-        {/* SCROLL CONTAINER */}
         <div
           ref={scrollRef}
-          className="flex gap-4 overflow-x-auto scrollbar-hide max-w-[750px] pb-2"
+          className="flex gap-4 overflow-x-auto scrollbar-hide max-w-[750px] pb-3"
         >
           {businesses.map((business) => (
             <div
               key={business._id}
               onClick={() => navigate(`/business/${business._id}`)}
-              className="min-w-[230px] max-w-[230px] bg-white/70 backdrop-blur-lg p-4 rounded-xl shadow hover:shadow-lg transition cursor-pointer text-center"
+              className="min-w-[220px] max-w-[220px] bg-white/70 backdrop-blur-lg rounded-xl shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden"
             >
 
-              {/* ICON */}
-              <div className="w-14 h-14 mx-auto mb-3 bg-purple-200 rounded-full flex items-center justify-center text-xl">
-                🏪
+              {/* IMAGE */}
+              <div className="relative h-24 w-full">
+                <img
+                  src={
+                    business.coverImage ||
+                    "https://via.placeholder.com/300x200"
+                  }
+                  className="w-full h-full object-cover"
+                />
+
+                {/* CATEGORY TAG */}
+                <div className="absolute bottom-2 left-2 text-[10px] px-2 py-0.5 bg-white/90 text-purple-600 rounded-full font-medium shadow">
+                  {business.category}
+                </div>
               </div>
 
-              {/* NAME */}
-              <h3 className="font-semibold text-sm">
-                {business.name}
-              </h3>
+              {/* CONTENT */}
+              <div className="p-3 text-center">
 
-              {/* CATEGORY */}
-              <p className="text-xs text-gray-500">
-                {business.category}
-              </p>
+                {/* NAME */}
+                <h3 className="font-semibold text-sm text-gray-800">
+                  {business.name}
+                </h3>
 
-              {/* OWNER */}
-              <p className="text-xs text-gray-600 mt-1">
-                👤 {business.ownerName}
-              </p>
+                {/* OWNER */}
+                <p className="text-[11px] text-gray-500 mt-1">
+                  by {business.ownerName}
+                </p>
 
-              {/* RATING (placeholder) */}
-              <p className="text-yellow-500 text-sm mt-1">
-                ⭐ 4.5
-              </p>
+                {/* RATING */}
+                <div className="flex justify-center items-center gap-1 mt-2 text-xs">
+                  <span className="text-yellow-500">★</span>
+                  <span className="font-medium">
+                    {business.avgRating || 0}
+                  </span>
+                  <span className="text-gray-400">
+                    ({business.totalReviews || 0})
+                  </span>
+                </div>
 
+                {/* BUTTON */}
+                <button className="mt-3 px-3 py-1 text-xs rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow hover:opacity-90 transition">
+                  View →
+                </button>
+
+              </div>
             </div>
           ))}
         </div>
-
       </div>
     </div>
   );

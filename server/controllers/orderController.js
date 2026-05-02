@@ -17,7 +17,6 @@ exports.createOrder = async (req, res) => {
       coordinates,
     } = req.body;
 
-    // 🔒 VALIDATION
     if (!userId) {
       return res.status(400).json({ message: "User ID is required" });
     }
@@ -26,9 +25,6 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: "Delivery address is required" });
     }
 
-    // =========================
-    // FETCH CART
-    // =========================
     const cart = await Cart.findOne({ user: userId }).populate({
       path: "items.product",
       populate: {
@@ -40,9 +36,6 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
-    // =========================
-    // CALCULATE TOTAL
-    // =========================
     let totalAmount = 0;
 
     const items = cart.items.map((item) => {
@@ -62,51 +55,33 @@ exports.createOrder = async (req, res) => {
       };
     });
 
-    // =========================
-    // GET BUSINESS
-    // =========================
     const business = cart.items[0].product.business;
 
     if (!business || !business._id) {
       return res.status(400).json({ message: "Business not found" });
     }
 
-    // =========================
-    // CREATE ORDER
-    // =========================
     const order = new Order({
       user: userId,
       business: business._id,
       items,
       totalAmount,
-
-      // ✅ DELIVERY SYSTEM
       deliveryType: deliveryType || "custom",
       deliveryAddress,
       deliveryTime: deliveryTime || "",
-
-      // ✅ PAYMENT + MAP
       paymentMethod: paymentMethod || "cod",
       coordinates: coordinates || null,
-
-      // 🔥 ADVANCED STATUS FLOW
       status: "pending",
     });
 
     await order.save();
 
-    // =========================
-    // REDUCE STOCK
-    // =========================
     for (const item of cart.items) {
       await Product.findByIdAndUpdate(item.product._id, {
         $inc: { stock: -item.quantity },
       });
     }
 
-    // =========================
-    // NOTIFY SELLER
-    // =========================
     const notification = await Notification.create({
       user: business.owner,
       message: "New order received",
@@ -122,9 +97,6 @@ exports.createOrder = async (req, res) => {
       type: "order",
     });
 
-    // =========================
-    // CLEAR CART
-    // =========================
     cart.items = [];
     await cart.save();
 
@@ -204,5 +176,33 @@ exports.updateOrderStatus = async (req, res) => {
   } catch (err) {
     console.error("UPDATE ORDER STATUS ERROR:", err);
     res.status(500).json({ message: "Error updating status" });
+  }
+};
+
+// =========================
+// 📊 BUSINESS INSIGHTS (🔥 FIX)
+// =========================
+exports.getInsights = async (req, res) => {
+  try {
+    const { businessId } = req.params;
+
+    const orders = await Order.find({
+      business: businessId,
+    });
+
+    let revenue = 0;
+
+    orders.forEach((order) => {
+      revenue += order.totalAmount || 0;
+    });
+
+    res.json({
+      revenue,
+      orders: orders.length,
+    });
+
+  } catch (err) {
+    console.error("INSIGHTS ERROR:", err);
+    res.status(500).json({ message: "Error fetching insights" });
   }
 };

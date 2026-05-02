@@ -2,6 +2,7 @@ const Business = require("../models/Business");
 const Product = require("../models/Product");
 const User = require("../models/User");
 const Notification = require("../models/Notification");
+const Review = require("../models/Review"); // ⭐ NEW
 
 // =========================
 // CREATE BUSINESS
@@ -43,6 +44,28 @@ exports.createBusiness = async (req, res) => {
 };
 
 // =========================
+// ⭐ HELPER: ADD RATING DATA
+// =========================
+const attachRatings = async (businesses) => {
+  return Promise.all(
+    businesses.map(async (b) => {
+      const reviews = await Review.find({ business: b._id });
+
+      const total = reviews.reduce((acc, r) => acc + r.rating, 0);
+
+      const avgRating =
+        reviews.length > 0 ? total / reviews.length : 0;
+
+      return {
+        ...b._doc,
+        avgRating: Number(avgRating.toFixed(1)),
+        totalReviews: reviews.length,
+      };
+    })
+  );
+};
+
+// =========================
 // PUBLIC: ONLY APPROVED
 // =========================
 exports.getAllBusinesses = async (req, res) => {
@@ -51,7 +74,9 @@ exports.getAllBusinesses = async (req, res) => {
       status: "approved",
     }).sort({ createdAt: -1 });
 
-    res.json(businesses);
+    const enriched = await attachRatings(businesses); // ⭐ NEW
+
+    res.json(enriched);
   } catch (err) {
     res.status(500).json({ message: "Error fetching businesses" });
   }
@@ -72,7 +97,11 @@ exports.getBusinessByUser = async (req, res) => {
       owner: userId,
     });
 
-    res.json(business);
+    if (!business) return res.json(null);
+
+    const enriched = await attachRatings([business]);
+
+    res.json(enriched[0]); // ⭐ NEW
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error fetching business" });
@@ -90,7 +119,9 @@ exports.getBusinessById = async (req, res) => {
       return res.status(404).json({ message: "Business not found" });
     }
 
-    res.json(business);
+    const enriched = await attachRatings([business]); // ⭐ NEW
+
+    res.json(enriched[0]);
   } catch (error) {
     res.status(500).json({ message: "Error fetching business" });
   }
@@ -105,7 +136,9 @@ exports.getAllBusinessesAdmin = async (req, res) => {
       createdAt: -1,
     });
 
-    res.json(businesses);
+    const enriched = await attachRatings(businesses); // ⭐ NEW
+
+    res.json(enriched);
   } catch (err) {
     res.status(500).json({ message: "Error fetching admin businesses" });
   }
@@ -254,17 +287,25 @@ exports.deleteBusiness = async (req, res) => {
 };
 
 // =========================
-// 🏆 LEADERBOARD (NEW FEATURE)
+// 🏆 LEADERBOARD (UPDATED)
 // =========================
 exports.getLeaderboard = async (req, res) => {
   try {
     const businesses = await Business.find({
       status: "approved",
-    })
-      .sort({ rating: -1, totalReviews: -1 })
-      .limit(5);
+    });
 
-    res.json(businesses);
+    const enriched = await attachRatings(businesses);
+
+    const sorted = enriched
+      .sort(
+        (a, b) =>
+          b.avgRating - a.avgRating ||
+          b.totalReviews - a.totalReviews
+      )
+      .slice(0, 5);
+
+    res.json(sorted);
   } catch (err) {
     console.error("LEADERBOARD ERROR:", err);
     res.status(500).json({ message: "Error fetching leaderboard" });

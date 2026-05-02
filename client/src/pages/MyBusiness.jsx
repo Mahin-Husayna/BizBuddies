@@ -94,6 +94,12 @@ function MyBusiness() {
                 >
                   📈 Insights
                 </button>
+                <button
+  onClick={() => navigate("/create-announcement")}
+  className="bg-purple-500 text-white px-4 py-2 rounded-lg"
+>
+  📢 Post Announcement
+</button>
               </div>
 
               {/* ================= BUSINESS CARD ================= */}

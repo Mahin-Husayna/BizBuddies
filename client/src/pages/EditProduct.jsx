@@ -1,160 +1,192 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 
-function EditProduct() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+function DealsPage() {
+  const [products, setProducts] = useState([]);
+  const [now, setNow] = useState(new Date());
 
+  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
 
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
-  const [discount, setDiscount] = useState("");
-  const [offerEndsAt, setOfferEndsAt] = useState("");
-  const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState("");
-
+  // =========================
+  // FETCH PRODUCTS (MATCH HOMEPAGE)
+  // =========================
   useEffect(() => {
     fetch("http://localhost:5000/api/products")
       .then((res) => res.json())
-      .then((data) => {
-        const product = data.find((p) => p._id === id);
-
-        if (product) {
-          setName(product.name || "");
-          setPrice(product.price || "");
-          setDiscount(product.discount || "");
-          setPreview(product.image || "");
-
-          if (product.offerEndsAt) {
-            const formattedDate = new Date(product.offerEndsAt)
-              .toISOString()
-              .slice(0, 16);
-
-            setOfferEndsAt(formattedDate);
-          }
-        }
-      })
+      .then(setProducts)
       .catch((err) => console.error(err));
-  }, [id]);
+  }, []);
 
-  const handleImageChange = (file) => {
-    setImage(file);
-    setPreview(URL.createObjectURL(file));
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // =========================
+  // SAME FILTER AS HOMEPAGE
+  // =========================
+  const deals = products.filter((p) => {
+    if (!p.discount || p.discount <= 0) return false;
+    if (!p.offerEndsAt) return true;
+    return new Date(p.offerEndsAt) > now;
+  });
+
+  const getRemainingTime = (endTime) => {
+    if (!endTime) return null;
+
+    const diff = new Date(endTime) - now;
+
+    if (diff <= 0) return "Expired";
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
+
+    return `${hours}h ${minutes}m ${seconds}s`;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const addToCart = async (productId) => {
+    if (!user?._id) return alert("Login first");
 
-    try {
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("price", price);
-      formData.append("discount", discount || 0);
-      formData.append("offerEndsAt", offerEndsAt || "");
+    await fetch("http://localhost:5000/api/cart/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: user._id,
+        productId,
+      }),
+    });
 
-      if (image) {
-        formData.append("image", image);
-      }
+    alert("Added to cart");
+  };
 
-      const res = await fetch(`http://localhost:5000/api/products/${id}`, {
-        method: "PUT",
-        body: formData,
-      });
+  const requestStock = async (productId) => {
+    if (!user?._id) return alert("Login first");
 
-      if (res.ok) {
-        toast.success("Product updated successfully!");
-        navigate("/my-business");
-      } else {
-        toast.error("Update failed");
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Server error");
-    }
+    await fetch("http://localhost:5000/api/cart/request-stock", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        productId,
+        userId: user._id,
+      }),
+    });
+
+    alert("Stock requested");
   };
 
   return (
-    <div className="min-h-screen p-4 bg-gradient-to-br from-purple-200 via-blue-200 to-pink-200">
-      <div className="flex gap-4 items-start">
-        <Sidebar />
+    <div className="flex min-h-screen bg-gradient-to-br from-purple-200 via-blue-200 to-pink-200">
+      <Sidebar />
 
-        <div className="flex-1 bg-white/40 backdrop-blur-xl p-6 rounded-2xl">
-          <Navbar user={user} />
+      <div className="flex-1 p-6">
+        <Navbar user={user} />
 
-          <h1 className="text-2xl font-bold text-purple-700 mb-6">
-            Edit Product
+        <div className="mt-4 bg-white/50 backdrop-blur-xl rounded-2xl shadow-lg p-6">
+          <h1 className="text-2xl font-bold mb-6">
+            🔥 All Recent Deals
           </h1>
 
-          <form
-            onSubmit={handleSubmit}
-            className="bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow max-w-lg flex flex-col gap-4"
-          >
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="border p-3 rounded-lg outline-none focus:ring-2 focus:ring-purple-400"
-              required
-            />
+          {deals.length === 0 ? (
+            <p>No deals available right now</p>
+          ) : (
+            <div className="grid grid-cols-3 gap-5">
+              {deals.map((product) => {
+                const finalPrice =
+                  product.discountedPrice || product.price;
 
-            <input
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              className="border p-3 rounded-lg outline-none focus:ring-2 focus:ring-purple-400"
-              required
-            />
+                return (
+                  <div
+                    key={product._id}
+                    className="relative bg-white p-4 rounded-xl shadow hover:shadow-lg transition"
+                  >
+                    <span className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                      {product.discount}% OFF
+                    </span>
 
-            <input
-              type="number"
-              placeholder="Discount % (optional)"
-              value={discount}
-              onChange={(e) => setDiscount(e.target.value)}
-              className="border p-3 rounded-lg outline-none focus:ring-2 focus:ring-purple-400"
-            />
+                    <img
+                      src={product.image}
+                      className="w-full h-36 object-cover rounded mb-3"
+                    />
 
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">
-                Limited-time offer ends at (optional)
-              </label>
-              <input
-                type="datetime-local"
-                value={offerEndsAt}
-                onChange={(e) => setOfferEndsAt(e.target.value)}
-                className="border p-3 rounded-lg outline-none focus:ring-2 focus:ring-purple-400 w-full"
-              />
+                    <p className="text-xs text-gray-500">
+                      {product.business?.name}
+                    </p>
+
+                    <h3 className="font-semibold text-sm">
+                      {product.name}
+                    </h3>
+
+                    <p className="text-gray-400 line-through text-xs">
+                      ৳{product.price}
+                    </p>
+
+                    <p className="text-purple-600 font-bold text-lg">
+                      ৳{Math.round(finalPrice)}
+                    </p>
+
+                    {product.stock > 0 ? (
+                      <p className="text-green-600 text-xs">
+                        In Stock
+                      </p>
+                    ) : (
+                      <p className="text-red-500 text-xs">
+                        Out of Stock
+                      </p>
+                    )}
+
+                    {product.offerEndsAt && (
+                      <p className="text-red-500 text-xs">
+                        ⏳ {getRemainingTime(product.offerEndsAt)}
+                      </p>
+                    )}
+
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        onClick={() =>
+                          navigate(`/business/${product.business?._id}`)
+                        }
+                        className="flex-1 border border-purple-400 text-purple-600 text-xs py-1 rounded"
+                      >
+                        View
+                      </button>
+
+                      {product.stock > 0 ? (
+                        <button
+                          onClick={() => addToCart(product._id)}
+                          className="flex-1 bg-purple-500 text-white text-xs py-1 rounded"
+                        >
+                          Add
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => requestStock(product._id)}
+                          className="flex-1 bg-orange-500 text-white text-xs py-1 rounded"
+                        >
+                          Request
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleImageChange(e.target.files[0])}
-              className="border p-2 rounded-lg"
-            />
-
-            {preview && (
-              <img
-                src={preview}
-                alt="preview"
-                className="w-full h-40 object-cover rounded-lg"
-              />
-            )}
-
-            <button
-              type="submit"
-              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-semibold hover:scale-105 transition"
-            >
-              Update Product
-            </button>
-          </form>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-export default EditProduct;
+export default DealsPage;

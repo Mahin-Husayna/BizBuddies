@@ -10,9 +10,6 @@ function Deals() {
 
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // =========================
-  // FETCH PRODUCTS
-  // =========================
   useEffect(() => {
     fetch("http://localhost:5000/api/products")
       .then((res) => res.json())
@@ -20,9 +17,6 @@ function Deals() {
       .catch((err) => console.error(err));
   }, []);
 
-  // =========================
-  // TIMER REFRESH
-  // =========================
   useEffect(() => {
     const timer = setInterval(() => {
       setNow(new Date());
@@ -32,16 +26,13 @@ function Deals() {
   }, []);
 
   const scrollLeft = () => {
-    scrollRef.current?.scrollBy({ left: -300, behavior: "smooth" });
+    scrollRef.current?.scrollBy({ left: -280, behavior: "smooth" });
   };
 
   const scrollRight = () => {
-    scrollRef.current?.scrollBy({ left: 300, behavior: "smooth" });
+    scrollRef.current?.scrollBy({ left: 280, behavior: "smooth" });
   };
 
-  // =========================
-  // OPEN BUSINESS PAGE
-  // =========================
   const openBusiness = (product) => {
     if (!product.business) return;
 
@@ -53,9 +44,6 @@ function Deals() {
     navigate(`/business/${id}`);
   };
 
-  // =========================
-  // ADD TO CART
-  // =========================
   const addToCart = async (productId) => {
     try {
       await fetch("http://localhost:5000/api/cart/add", {
@@ -73,9 +61,6 @@ function Deals() {
     }
   };
 
-  // =========================
-  // REQUEST STOCK
-  // =========================
   const requestStock = async (productId) => {
     try {
       await fetch("http://localhost:5000/api/cart/request-stock", {
@@ -107,9 +92,6 @@ function Deals() {
     return `${hours}h ${minutes}m ${seconds}s`;
   };
 
-  // =========================
-  // FILTER DEALS
-  // =========================
   const deals = products.filter((p) => {
     if (!p.discount || p.discount <= 0) return false;
     if (!p.offerEndsAt) return true;
@@ -128,116 +110,123 @@ function Deals() {
         <div className="flex gap-2">
           <button
             onClick={scrollLeft}
-            className="bg-white shadow px-3 py-1 rounded-lg hover:scale-105 transition"
+            className="bg-white/80 px-3 py-1 rounded-lg shadow hover:scale-105 transition"
           >
             ◀
           </button>
 
           <button
             onClick={scrollRight}
-            className="bg-white shadow px-3 py-1 rounded-lg hover:scale-105 transition"
+            className="bg-white/80 px-3 py-1 rounded-lg shadow hover:scale-105 transition"
           >
             ▶
           </button>
         </div>
       </div>
 
-      {/* DEALS */}
       {deals.length === 0 ? (
         <p className="text-gray-500 text-sm">
           No deals available right now
         </p>
       ) : (
-        <div className="relative">
+        <div className="flex justify-center">
 
-          {/* SCROLL AREA */}
           <div
             ref={scrollRef}
-            className="flex gap-5 overflow-x-auto scroll-smooth no-scrollbar py-2"
+            className="flex gap-4 overflow-x-auto no-scrollbar max-w-[750px] pb-3"
           >
             {deals.map((product) => (
               <div
                 key={product._id}
                 onClick={() => openBusiness(product)}
-                className="min-w-[240px] bg-white p-4 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+                className="min-w-[220px] max-w-[220px] bg-white/70 backdrop-blur-lg rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden"
               >
 
-                {/* DISCOUNT */}
-                <span className="absolute bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                  {product.discount}% OFF
-                </span>
+                {/* IMAGE */}
+                <div className="relative h-28 w-full">
+                  <img
+                    src={product.image || "https://via.placeholder.com/150"}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
 
-                <img
-                  src={product.image || "https://via.placeholder.com/150"}
-                  alt={product.name}
-                  className="w-full h-32 object-cover rounded-lg mb-3"
-                />
-
-                <h3 className="font-semibold text-sm">
-                  {product.name}
-                </h3>
-
-                <p className="text-xs text-gray-500">
-                  {product.seller}
-                </p>
-
-                {/* PRICE */}
-                <div className="mt-2">
-                  <p className="text-xs text-gray-400 line-through">
-                    ৳{product.price}
-                  </p>
-
-                  <p className="text-purple-600 font-bold text-lg">
-                    ৳{Math.round(product.discountedPrice)}
-                  </p>
+                  {/* DISCOUNT BADGE */}
+                  <div className="absolute top-2 left-2 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full shadow">
+                    {product.discount}% OFF
+                  </div>
                 </div>
 
-                {/* STOCK */}
-                {product.stock > 0 ? (
-                  <p className="text-green-600 text-xs mt-1">
-                    In Stock
-                  </p>
-                ) : (
-                  <p className="text-red-500 text-xs mt-1">
-                    Out of Stock
-                  </p>
-                )}
+                {/* CONTENT */}
+                <div className="p-3">
 
-                {/* TIMER */}
-                {product.offerEndsAt && (
-                  <p className="text-red-500 text-xs mt-1">
-                    ⏳ {getRemainingTime(product.offerEndsAt)}
-                  </p>
-                )}
+                  {/* NAME */}
+                  <h3 className="font-semibold text-sm text-gray-800">
+                    {product.name}
+                  </h3>
 
-                {/* 🔥 CART ACTIONS */}
-                <div className="mt-3 flex gap-2">
-                  {product.stock > 0 ? (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        addToCart(product._id);
-                      }}
-                      className="bg-purple-500 text-white text-xs px-3 py-1 rounded-lg hover:scale-105 transition"
-                    >
-                      Add to Cart
-                    </button>
-                  ) : (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        requestStock(product._id);
-                      }}
-                      className="bg-orange-500 text-white text-xs px-3 py-1 rounded-lg hover:scale-105 transition"
-                    >
-                      Request Stock
-                    </button>
+                  {/* SELLER */}
+                  <p className="text-[11px] text-gray-500">
+                    {product.seller}
+                  </p>
+
+                  {/* PRICE */}
+                  <div className="mt-2">
+                    <p className="text-xs text-gray-400 line-through">
+                      ৳{product.price}
+                    </p>
+                    <p className="text-purple-600 font-bold text-base">
+                      ৳{Math.round(product.discountedPrice)}
+                    </p>
+                  </div>
+
+                  {/* STOCK */}
+                  <p
+                    className={`text-[11px] mt-1 ${
+                      product.stock > 0
+                        ? "text-green-600"
+                        : "text-red-500"
+                    }`}
+                  >
+                    {product.stock > 0 ? "In Stock" : "Out of Stock"}
+                  </p>
+
+                  {/* TIMER */}
+                  {product.offerEndsAt && (
+                    <p className="text-red-500 text-[11px] mt-1">
+                      ⏳ {getRemainingTime(product.offerEndsAt)}
+                    </p>
                   )}
-                </div>
 
+                  {/* BUTTON */}
+                  <div className="mt-3">
+                    {product.stock > 0 ? (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToCart(product._id);
+                        }}
+                        className="w-full text-xs py-1.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow hover:opacity-90 transition"
+                      >
+                        Add to Cart
+                      </button>
+                    ) : (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          requestStock(product._id);
+                        }}
+                        className="w-full text-xs py-1.5 rounded-full bg-orange-500 text-white shadow hover:opacity-90 transition"
+                      >
+                        Request Stock
+                      </button>
+                    )}
+                  </div>
+
+                </div>
               </div>
             ))}
           </div>
+
         </div>
       )}
     </div>

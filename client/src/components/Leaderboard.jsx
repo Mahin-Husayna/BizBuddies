@@ -13,60 +13,57 @@ function Leaderboard() {
       .catch((err) => console.error(err));
   }, []);
 
-  // 🏆 Medal colors
-  const getRankStyle = (index) => {
-    if (index === 0) return "text-yellow-500"; // gold
-    if (index === 1) return "text-gray-400";   // silver
-    if (index === 2) return "text-orange-400"; // bronze
-    return "text-purple-500";
+  // 🏆 Medal styles
+  const getRank = (index) => {
+    if (index === 0) return "🥇";
+    if (index === 1) return "🥈";
+    if (index === 2) return "🥉";
+    return `#${index + 1}`;
   };
 
   return (
     <div className="w-[300px] flex flex-col gap-4">
 
-      {/* LEADERBOARD */}
+      {/* 🏆 LEADERBOARD */}
       <div className="bg-white/50 backdrop-blur-xl p-4 rounded-2xl shadow-md">
 
         {/* HEADER */}
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-md font-semibold text-purple-700">
+          <h2 className="text-md font-semibold text-purple-700 flex items-center gap-2">
             🏆 Campus Leaderboard
           </h2>
-          <span className="text-xs text-purple-500 cursor-pointer hover:underline">
-            View All
-          </span>
         </div>
 
         {/* LIST */}
         <div className="flex flex-col gap-3">
 
           {leaders.length === 0 ? (
-            <p className="text-sm text-gray-500">No rankings yet</p>
+            <p className="text-sm text-gray-500 text-center py-4">
+              No rankings yet
+            </p>
           ) : (
             leaders.map((item, index) => (
               <div
                 key={item._id}
                 onClick={() => navigate(`/business/${item._id}`)}
-                className="flex items-center justify-between bg-white p-3 rounded-xl shadow-sm hover:shadow-md transition cursor-pointer"
+                className="flex items-center justify-between bg-white/70 p-3 rounded-xl shadow-sm hover:shadow-lg hover:-translate-y-[2px] transition-all cursor-pointer"
               >
 
                 {/* LEFT */}
                 <div className="flex items-center gap-3">
 
-                  {/* RANK */}
-                  <span
-                    className={`text-lg font-bold ${getRankStyle(index)}`}
-                  >
-                    {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : index + 1}
+                  {/* 🏅 RANK */}
+                  <span className="text-lg font-bold w-6 text-center">
+                    {getRank(index)}
                   </span>
 
-                  {/* IMAGE */}
+                  {/* 🖼 IMAGE */}
                   <img
                     src={
                       item.coverImage ||
                       "https://via.placeholder.com/40"
                     }
-                    className="w-10 h-10 rounded-full object-cover border"
+                    className="w-10 h-10 rounded-full object-cover border-2 border-white shadow"
                   />
 
                   {/* INFO */}
@@ -75,19 +72,19 @@ function Leaderboard() {
                       {item.name}
                     </p>
 
-                    <p className="text-xs text-gray-500">
-                      ⭐ {item.rating?.toFixed(1) || 0} •{" "}
-                      {item.totalReviews || 0} reviews
-                    </p>
+                    {/* ⭐ FIXED RATING */}
+                    {item.totalReviews > 0 ? (
+                      <p className="text-xs text-gray-500">
+                        ⭐ {item.avgRating?.toFixed(1)} • {item.totalReviews} reviews
+                      </p>
+                    ) : (
+                      <p className="text-xs text-gray-400 italic">
+                        No ratings yet
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                {/* RIGHT */}
-                <div className="text-right">
-                  <p className="text-purple-600 font-bold text-sm">
-                    {item.rating?.toFixed(1) || 0}
-                  </p>
-                </div>
 
               </div>
             ))
@@ -95,7 +92,7 @@ function Leaderboard() {
         </div>
       </div>
 
-      {/* ANNOUNCEMENTS */}
+      {/* 📢 ANNOUNCEMENTS */}
       <Announcements />
     </div>
   );
