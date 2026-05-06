@@ -53,15 +53,11 @@ function MyBusiness() {
 
   return (
     <div className="min-h-screen p-4 bg-gradient-to-br from-purple-200 via-blue-200 to-pink-200">
-
       <div className="flex gap-4">
-
-        {/* SIDEBAR */}
         <Sidebar />
 
-        <div className="flex-1 bg-white/40 backdrop-blur-xl p-6 rounded-2xl">
+        <div className="flex-1 bg-white/50 backdrop-blur-xl p-6 rounded-2xl shadow">
 
-          {/* NAVBAR */}
           <Navbar user={user} />
 
           {!business || business.message ? (
@@ -72,97 +68,103 @@ function MyBusiness() {
 
               <button
                 onClick={() => navigate("/create-business")}
-                className="mt-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-xl"
+                className="mt-4 bg-purple-500 text-white px-6 py-2 rounded-lg"
               >
                 Create Business
               </button>
             </div>
           ) : (
             <>
-              {/* ================= ACTION BUTTONS (FIXED POSITION) ================= */}
-              <div className="flex justify-end gap-2 mb-3">
-                <button
-                  onClick={() => navigate("/seller-dashboard")}
-                  className="bg-white border border-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-100 transition shadow-sm"
-                >
-                  📊 Dashboard
-                </button>
+              {/* ACTION BAR */}
+              <div className="flex justify-between items-center mb-6 flex-wrap gap-3">
+                <h2 className="text-xl font-semibold text-gray-800">
+                  My Business
+                </h2>
 
-                <button
-                  onClick={() => navigate("/insights")}
-                  className="bg-white border border-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-100 transition shadow-sm"
-                >
-                  📈 Insights
-                </button>
-                <button
-  onClick={() => navigate("/create-announcement")}
-  className="bg-purple-500 text-white px-4 py-2 rounded-lg"
->
-  📢 Post Announcement
-</button>
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    onClick={() => navigate("/seller-dashboard")}
+                    className="bg-white border px-4 py-2 rounded-lg text-sm hover:bg-gray-100"
+                  >
+                    📊 Dashboard
+                  </button>
+
+                  <button
+                    onClick={() => navigate("/insights")}
+                    className="bg-white border px-4 py-2 rounded-lg text-sm hover:bg-gray-100"
+                  >
+                    📈 Insights
+                  </button>
+
+                  <button
+                    onClick={() => navigate("/create-announcement")}
+                    className="bg-purple-500 text-white px-4 py-2 rounded-lg"
+                  >
+                    📢 Post Announcement
+                  </button>
+                </div>
               </div>
 
-              {/* ================= BUSINESS CARD ================= */}
-              <div className="bg-white/80 p-6 rounded-2xl shadow mb-6">
+              {/* BUSINESS CARD */}
+              <div className="bg-white p-6 rounded-2xl shadow mb-6">
 
-                {/* COVER */}
                 {business.coverImage && (
                   <img
                     src={business.coverImage}
-                    className="w-full h-40 object-cover rounded-lg mb-4"
+                    className="w-full h-44 object-cover rounded-xl mb-4"
                   />
                 )}
 
-                <h1 className="text-2xl font-bold text-gray-800">
-                  {business.name}
-                </h1>
+                <div className="flex justify-between items-start flex-wrap gap-4">
+                  <div>
+                    <h1 className="text-2xl font-bold text-gray-800">
+                      {business.name}
+                    </h1>
 
-                <p className="text-gray-600">
-                  {business.category}
-                </p>
+                    <p className="text-gray-500 text-sm">
+                      {business.category}
+                    </p>
 
-                <p className="text-sm text-gray-700 mt-2">
-                  👤 Owner: {business.ownerName}
-                </p>
+                    <p className="text-sm text-gray-600 mt-1">
+                      👤 Owner: {business.ownerName}
+                    </p>
 
-                {/* STATUS */}
-                {business.status === "pending" && (
-                  <p className="text-yellow-500 mt-2 font-medium">
-                    ⏳ Waiting for admin approval
-                  </p>
-                )}
+                    {business.status === "pending" && (
+                      <p className="text-yellow-500 mt-2 text-sm">
+                        ⏳ Waiting for admin approval
+                      </p>
+                    )}
+                  </div>
 
-                {/* DELETE BUSINESS */}
-                <button
-                  onClick={async () => {
-                    const confirmDelete = window.confirm(
-                      "Are you sure? This will delete your business and ALL products."
-                    );
-                    if (!confirmDelete) return;
-
-                    try {
-                      const res = await fetch(
-                        `http://localhost:5000/api/business/${business._id}`,
-                        { method: "DELETE" }
+                  <button
+                    onClick={async () => {
+                      const confirmDelete = window.confirm(
+                        "Are you sure? This will delete your business and ALL products."
                       );
+                      if (!confirmDelete) return;
 
-                      if (res.ok) {
-                        toast.success("Business deleted successfully");
-                        setBusiness(null);
-                        setProducts([]);
-                      } else {
-                        toast.error("Failed to delete business");
+                      try {
+                        const res = await fetch(
+                          `http://localhost:5000/api/business/${business._id}`,
+                          { method: "DELETE" }
+                        );
+
+                        if (res.ok) {
+                          toast.success("Business deleted successfully");
+                          setBusiness(null);
+                          setProducts([]);
+                        } else {
+                          toast.error("Failed to delete business");
+                        }
+                      } catch (err) {
+                        toast.error("Server error");
                       }
-                    } catch (err) {
-                      console.error(err);
-                      toast.error("Server error");
-                    }
-                  }}
-                  className="mt-4 bg-red-500 text-white px-5 py-2 rounded-xl hover:bg-red-600 transition"
-                >
-                  Delete Profile
-                </button>
-
+                    }}
+                    className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                  >
+                    Delete Profile
+                  </button>
+                </div>
               </div>
 
               {/* ADD PRODUCT */}
@@ -173,51 +175,51 @@ function MyBusiness() {
                       state: { businessId: business._id },
                     })
                   }
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-xl mb-6"
+                  className="bg-purple-500 text-white px-5 py-2 rounded-lg mb-6"
                 >
                   + Add Product
                 </button>
               )}
 
               {/* PRODUCTS */}
-              <h2 className="text-xl font-semibold mb-4">
+              <h2 className="text-lg font-semibold mb-4">
                 Your Products
               </h2>
 
               {products.length === 0 ? (
                 <p>No products yet</p>
               ) : (
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 gap-5">
 
                   {products.map((p) => (
                     <div
                       key={p._id}
-                      className="bg-white/80 p-4 rounded-xl shadow relative group"
+                      className="bg-white p-4 rounded-xl shadow hover:shadow-lg transition relative group"
                     >
 
                       {/* DELETE */}
                       <button
                         onClick={() => deleteProduct(p._id)}
-                        className="absolute top-2 right-2 text-red-500 text-lg opacity-0 group-hover:opacity-100"
+                        className="absolute top-2 right-2 text-red-500 opacity-0 group-hover:opacity-100"
                       >
-                        ❌
+                        ✕
                       </button>
 
                       {/* IMAGE */}
                       <img
                         src={p.image || "https://via.placeholder.com/150"}
-                        className="w-full h-28 object-cover rounded-lg mb-2"
+                        className="w-full h-32 object-cover rounded-lg mb-3"
                       />
 
                       {/* NAME */}
-                      <h3 className="font-semibold text-sm">
+                      <h3 className="font-semibold text-sm text-gray-800">
                         {p.name}
                       </h3>
 
                       {/* PRICE */}
                       {p.discount > 0 ? (
                         <>
-                          <p className="text-xs line-through text-gray-400">
+                          <p className="text-xs text-gray-400 line-through">
                             ৳{p.price}
                           </p>
                           <p className="text-purple-600 font-bold">
@@ -243,11 +245,10 @@ function MyBusiness() {
                       {/* EDIT */}
                       <button
                         onClick={() => navigate(`/edit-product/${p._id}`)}
-                        className="mt-2 text-xs text-blue-500 underline"
+                        className="mt-2 text-xs text-purple-600 hover:underline"
                       >
-                        Edit
+                        Edit Product
                       </button>
-
                     </div>
                   ))}
 
@@ -255,7 +256,6 @@ function MyBusiness() {
               )}
             </>
           )}
-
         </div>
       </div>
     </div>
