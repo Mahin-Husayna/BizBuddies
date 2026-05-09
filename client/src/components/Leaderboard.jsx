@@ -13,7 +13,7 @@ function Leaderboard() {
       .catch((err) => console.error(err));
   }, []);
 
-  // 🏆 Medal styles
+  // medals
   const getRank = (index) => {
     if (index === 0) return "🥇";
     if (index === 1) return "🥈";
@@ -24,7 +24,7 @@ function Leaderboard() {
   return (
     <div className="w-[300px] flex flex-col gap-4">
 
-      {/* 🏆 LEADERBOARD */}
+      {/* leaderboard */}
       <div className="bg-white/50 backdrop-blur-xl p-4 rounded-2xl shadow-md">
 
         {/* HEADER */}
@@ -34,7 +34,7 @@ function Leaderboard() {
           </h2>
         </div>
 
-        {/* LIST */}
+        {/* list of top*/}
         <div className="flex flex-col gap-3">
 
           {leaders.length === 0 ? (

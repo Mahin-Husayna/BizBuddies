@@ -4,7 +4,7 @@ const productSchema = new mongoose.Schema({
   name: String,
   price: Number,
 
-  // ✅ NEW STOCK FIELD
+  //new stock
   stock: {
     type: Number,
     default: 0,

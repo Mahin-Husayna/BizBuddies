@@ -10,13 +10,12 @@ function BusinessProfile() {
 
   const [business, setBusiness] = useState(null);
   const [products, setProducts] = useState([]);
-  const [reviews, setReviews] = useState([]); // 🔥 NEW
+  const [reviews, setReviews] = useState([]);
 
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // =========================
-  // FETCH DATA
-  // =========================
+
+  //fetch data
   useEffect(() => {
     fetch(`http://localhost:5000/api/business/single/${id}`)
       .then((res) => res.json())
@@ -28,16 +27,14 @@ function BusinessProfile() {
       .then((data) => setProducts(data))
       .catch((err) => console.error(err));
 
-    // 🔥 FETCH REVIEWS
+    // FETCH REVIEWS
     fetch(`http://localhost:5000/api/reviews/${id}`)
       .then((res) => res.json())
       .then(setReviews)
       .catch((err) => console.error(err));
   }, [id]);
 
-  // =========================
-  // 💬 MESSAGE SELLER
-  // =========================
+  //message seller option
   const handleMessageSeller = async () => {
     try {
       if (!user) {
@@ -55,31 +52,39 @@ function BusinessProfile() {
         return;
       }
 
-      const res = await fetch("http://localhost:5000/api/messages/start", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          senderId: user._id,
-          receiverId: sellerId,
-          productId: null,
-        }),
-      });
+      const firstProduct = products[0];
+
+      const res = await fetch(
+        "http://localhost:5000/api/messages/start",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            senderId: user._id,
+            receiverId: sellerId,
+
+            // FIXED
+            productId: firstProduct?._id || null,
+          }),
+        }
+      );
 
       const convo = await res.json();
 
       localStorage.setItem("activeChat", convo._id);
+
       navigate("/messages");
+
     } catch (err) {
       console.error(err);
       alert("Error starting chat");
     }
   };
 
-  // =========================
-  // 🛒 ADD TO CART
-  // =========================
+  // cart e add korbo
   const addToCart = async (productId) => {
     try {
       if (!user) {
@@ -87,16 +92,20 @@ function BusinessProfile() {
         return;
       }
 
-      const res = await fetch("http://localhost:5000/api/cart/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: user._id,
-          productId,
-        }),
-      });
+      const res = await fetch(
+        "http://localhost:5000/api/cart/add",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            userId: user._id,
+            productId,
+          }),
+        }
+      );
 
       if (!res.ok) {
         alert("Failed to add to cart");
@@ -104,15 +113,15 @@ function BusinessProfile() {
       }
 
       alert("Added to cart");
+
     } catch (err) {
       console.error(err);
       alert("Server error");
     }
   };
 
-  // =========================
-  // 📦 REQUEST STOCK
-  // =========================
+  
+  //request stock option
   const requestStock = async (productId) => {
     try {
       if (!user) {
@@ -120,25 +129,31 @@ function BusinessProfile() {
         return;
       }
 
-      await fetch("http://localhost:5000/api/cart/request-stock", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          productId,
-          userId: user._id,
-        }),
-      });
+      await fetch(
+        "http://localhost:5000/api/cart/request-stock",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            productId,
+            userId: user._id,
+          }),
+        }
+      );
 
       alert("Stock request sent");
+
     } catch (err) {
       console.error(err);
       alert("Error requesting stock");
     }
   };
 
-  if (!business) return <div className="p-10">Loading...</div>;
+  if (!business)
+    return <div className="p-10">Loading...</div>;
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-purple-200 via-blue-200 to-pink-200">
@@ -153,7 +168,10 @@ function BusinessProfile() {
         <div className="bg-white/50 backdrop-blur-xl rounded-2xl shadow-lg overflow-hidden mt-4">
 
           <img
-            src={business.coverImage || "https://via.placeholder.com/800x300"}
+            src={
+              business.coverImage ||
+              "https://via.placeholder.com/800x300"
+            }
             className="w-full h-64 object-cover"
           />
 
@@ -162,11 +180,13 @@ function BusinessProfile() {
             <div className="flex items-center justify-between flex-wrap gap-4">
 
               <div className="flex items-center gap-4">
+
                 <div className="w-16 h-16 bg-purple-300 rounded-full flex items-center justify-center text-2xl">
                   🏪
                 </div>
 
                 <div>
+
                   <h1 className="text-2xl font-bold">
                     {business.name}
                   </h1>
@@ -179,10 +199,13 @@ function BusinessProfile() {
                     👤 {business.ownerName}
                   </p>
 
-                  {/* ⭐ RATING */}
+                  {/* RATING */}
                   <p className="text-yellow-500 mt-1">
-                    ⭐ {business.averageRating?.toFixed(1) || 0} ({business.totalReviews || 0})
+                    ⭐{" "}
+                    {business.averageRating?.toFixed(1) || 0} (
+                    {business.totalReviews || 0})
                   </p>
+
                 </div>
               </div>
 
@@ -192,16 +215,19 @@ function BusinessProfile() {
               >
                 💬 Message Seller
               </button>
+
             </div>
 
             <p className="mt-4 text-gray-700">
               {business.description}
             </p>
+
           </div>
         </div>
 
         {/* PRODUCTS */}
         <div className="mt-8">
+
           <h2 className="text-xl font-semibold mb-4">
             Products
           </h2>
@@ -218,7 +244,10 @@ function BusinessProfile() {
                 >
 
                   <img
-                    src={product.image || "https://via.placeholder.com/150"}
+                    src={
+                      product.image ||
+                      "https://via.placeholder.com/150"
+                    }
                     className="w-full h-28 object-cover rounded mb-2"
                   />
 
@@ -232,8 +261,12 @@ function BusinessProfile() {
                       <p className="text-xs text-gray-400 line-through">
                         ৳{product.price}
                       </p>
+
                       <p className="text-purple-600 font-bold">
-                        ৳{Math.round(product.discountedPrice)}
+                        ৳
+                        {Math.round(
+                          product.discountedPrice
+                        )}
                       </p>
                     </>
                   ) : (
@@ -262,32 +295,37 @@ function BusinessProfile() {
 
                   {/* ACTION */}
                   <div className="mt-3">
+
                     {product.stock > 0 ? (
                       <button
-                        onClick={() => addToCart(product._id)}
+                        onClick={() =>
+                          addToCart(product._id)
+                        }
                         className="bg-purple-500 text-white text-xs px-3 py-1 rounded-lg hover:scale-105 transition"
                       >
                         Add to Cart
                       </button>
                     ) : (
                       <button
-                        onClick={() => requestStock(product._id)}
+                        onClick={() =>
+                          requestStock(product._id)
+                        }
                         className="bg-orange-500 text-white text-xs px-3 py-1 rounded-lg hover:scale-105 transition"
                       >
                         Request Stock
                       </button>
                     )}
-                  </div>
 
+                  </div>
                 </div>
               ))}
-
             </div>
           )}
         </div>
 
-        {/* 🔥 REVIEWS SECTION */}
+        {/* REVIEWS */}
         <div className="mt-10">
+
           <h2 className="text-xl font-semibold mb-4">
             Customer Reviews
           </h2>
@@ -300,9 +338,19 @@ function BusinessProfile() {
                 key={r._id}
                 className="bg-white p-4 rounded-xl shadow mb-3"
               >
-                <p className="font-semibold">{r.user.name}</p>
-                <p className="text-yellow-500">⭐ {r.rating}</p>
-                <p className="text-sm text-gray-600">{r.comment}</p>
+
+                <p className="font-semibold">
+                  {r.user.name}
+                </p>
+
+                <p className="text-yellow-500">
+                  ⭐ {r.rating}
+                </p>
+
+                <p className="text-sm text-gray-600">
+                  {r.comment}
+                </p>
+
               </div>
             ))
           )}

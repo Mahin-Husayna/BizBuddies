@@ -2,9 +2,8 @@ const Conversation = require("../models/Conversation");
 const Message = require("../models/Message");
 const Notification = require("../models/Notification");
 
-// =========================
-// START CONVERSATION
-// =========================
+
+//start a convo
 exports.startConversation = async (req, res) => {
   try {
     const { senderId, receiverId, productId } = req.body;
@@ -29,9 +28,7 @@ exports.startConversation = async (req, res) => {
   }
 };
 
-// =========================
-// SEND MESSAGE
-// =========================
+//send message
 exports.sendMessage = async (req, res) => {
   try {
     const { conversationId, sender, text, receiverId } = req.body;
@@ -44,7 +41,7 @@ exports.sendMessage = async (req, res) => {
 
     await message.save();
 
-    // 🔥 UPDATE CONVERSATION
+    //conversation updatte
     await Conversation.findByIdAndUpdate(conversationId, {
       lastMessage: {
         text,
@@ -54,20 +51,20 @@ exports.sendMessage = async (req, res) => {
       $inc: { unreadCount: 1 }, // only matters for receiver UI
     });
 
-    // 🔔 CREATE NOTIFICATION (IMPROVED)
+    //notif creation
     const notification = await Notification.create({
       user: receiverId,
       message: `New message: ${text}`,
       type: "message",
     });
 
-    // 🔥 SOCKET
+    // SOCKET
     const io = req.app.get("io");
 
-    // 💬 real-time message
+    //real-time message
     io.to(receiverId).emit("newMessage", message);
 
-    // 🔔 real-time notification
+    // real-time notification
     io.to(receiverId).emit("newNotification", {
       _id: notification._id,
       message: notification.message,
@@ -81,9 +78,8 @@ exports.sendMessage = async (req, res) => {
   }
 };
 
-// =========================
-// GET CONVERSATIONS
-// =========================
+
+//get conversations
 exports.getConversations = async (req, res) => {
   try {
     const convos = await Conversation.find({
@@ -120,9 +116,7 @@ exports.getMessages = async (req, res) => {
   }
 };
 
-// =========================
-// MARK AS READ
-// =========================
+//read marked
 exports.markAsRead = async (req, res) => {
   try {
     await Conversation.findByIdAndUpdate(req.params.convoId, {

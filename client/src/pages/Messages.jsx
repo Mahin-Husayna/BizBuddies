@@ -79,7 +79,7 @@ function Messages() {
                     </p>
                   </div>
 
-                  {/* 🔴 UNREAD */}
+                  {/*UNREAD */}
                   {c.unreadCount > 0 && (
                     <span className="w-2 h-2 bg-red-500 rounded-full"></span>
                   )}
@@ -93,8 +93,7 @@ function Messages() {
             {selectedConvo ? (
               <Chat convoId={selectedConvo} />
             ) : (
-              <div className="flex justify-center items-center h-full text-gray-400">
-                Select a conversation
+              <div className="flex justify-center items-center h-full text-gray-400"> Select a conversation
               </div>
             )}
           </div>

@@ -6,7 +6,7 @@ const {
   getOrders,
   getSellerOrders,
   updateOrderStatus,
-  getInsights, // ✅ ADD THIS
+  getInsights, 
 } = require("../controllers/orderController");
 
 // USER
@@ -18,6 +18,6 @@ router.get("/seller/:businessId", getSellerOrders);
 router.put("/status/:orderId", updateOrderStatus);
 
 // 📊 INSIGHTS
-router.get("/insights/:businessId", getInsights); // ✅ FIXED
+router.get("/insights/:businessId", getInsights);
 
 module.exports = router;

@@ -6,7 +6,7 @@ const notificationSchema = new mongoose.Schema({
     ref: "User",
   },
   message: String,
-  type: String, // "business", "order", etc.
+  type: String, 
   isRead: {
     type: Boolean,
     default: false,

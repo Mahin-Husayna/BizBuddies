@@ -8,29 +8,24 @@ function Chat({ convoId }) {
 
   const bottomRef = useRef(null);
 
-  // =========================
-  // FETCH MESSAGES
-  // =========================
+//fetch message korbe
   useEffect(() => {
     fetch(`http://localhost:5000/api/messages/${convoId}`)
       .then((res) => res.json())
       .then(setMessages);
   }, [convoId]);
 
-  // =========================
-  // AUTO SCROLL
-  // =========================
+  
+  //scrolling
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // =========================
-  // SEND MESSAGE
-  // =========================
+  //message send korbe
   const sendMessage = async () => {
     if (!text.trim()) return;
 
-    const temp = {
+    const temp= {
       _id: Date.now(),
       sender: user._id,
       text,

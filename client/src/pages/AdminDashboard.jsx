@@ -34,7 +34,7 @@ function AdminDashboard() {
     );
 
     toast.success(`Business ${action}ed`);
-    fetchBusinesses(); // 🔥 refresh instantly
+    fetchBusinesses(); //refresh
   };
 
   if (!user || user.role !== "admin") {

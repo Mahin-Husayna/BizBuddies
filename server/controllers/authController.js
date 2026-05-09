@@ -15,7 +15,7 @@ exports.signup = async (req, res) => {
       name,
       email,
       password,
-      role: "buyer", // default
+      role: "buyer",
     });
 
     await user.save();

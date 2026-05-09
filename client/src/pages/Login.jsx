@@ -22,10 +22,10 @@ function Login() {
 
     const data = await res.json();
 
-    console.log("RESPONSE:", data); // ✅ debug
+    console.log("RESPONSE:", data); 
 
     if (res.ok) {
-      localStorage.setItem("user", JSON.stringify(data.user)); // ✅ important
+      localStorage.setItem("user", JSON.stringify(data.user)); 
       alert("Login successful");
       navigate("/home");
     } else {
@@ -33,7 +33,7 @@ function Login() {
     }
 
   } catch (err) {
-    console.error("LOGIN ERROR:", err); // ✅ better debug
+    console.error("LOGIN ERROR:", err); 
     alert("Something went wrong");
   }
 };

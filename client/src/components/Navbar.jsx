@@ -30,9 +30,7 @@ function Navbar({ user }) {
     io("http://localhost:5000")
   );
 
-  // =========================
   // SEARCH
-  // =========================
   useEffect(() => {
     if (!query.trim()) {
       setShowDropdown(false);
@@ -51,9 +49,7 @@ function Navbar({ user }) {
     return () => clearTimeout(delay);
   }, [query]);
 
-  // =========================
-  // FETCH NOTIFICATIONS
-  // =========================
+ //fetch notifications
   const fetchNotifications = async () => {
     if (!user?._id) return;
 
@@ -74,15 +70,13 @@ function Navbar({ user }) {
     fetchNotifications();
   }, [user]);
 
-  // =========================
-  // SOCKET
-  // =========================
+
   useEffect(() => {
     if (!user?._id) return;
 
     socket.emit("register", user._id);
 
-    // 🔔 NOTIFICATION
+    //notification
     socket.on("newNotification", (data) => {
       setNotifications((prev) => [
         {
@@ -104,7 +98,7 @@ function Navbar({ user }) {
       setNotifCount(updated);
     });
 
-    // 💬 MESSAGE
+    // MESSAGE
     socket.on("newMessage", () => {
       const prev = Number(
         localStorage.getItem("msgCount") || 0
@@ -137,9 +131,9 @@ function Navbar({ user }) {
     };
   }, [user, socket]);
 
-  // =========================
+
   // LOAD COUNTS
-  // =========================
+  
   useEffect(() => {
     const msgs = Number(
       localStorage.getItem("msgCount") || 0
@@ -153,9 +147,9 @@ function Navbar({ user }) {
     setNotifCount(notif);
   }, []);
 
-  // =========================
+ 
   // BELL CLICK
-  // =========================
+ 
   const handleBellClick = async () => {
     setShowNotif(!showNotif);
 
@@ -226,11 +220,11 @@ function Navbar({ user }) {
 
         </div>
 
-        {/* SEARCH DROPDOWN */}
+        {/* search dropdown */}
         {showDropdown && (
           <div className="absolute w-full bg-white mt-2 rounded-2xl shadow-xl z-50 max-h-80 overflow-y-auto border border-gray-100">
 
-            {/* BUSINESSES */}
+            {/*BUSINESS */}
             {results.businesses.length > 0 && (
               <div className="p-3 border-b">
 
@@ -278,7 +272,7 @@ function Navbar({ user }) {
       {/* RIGHT */}
       <div className="flex items-center gap-5 relative">
 
-        {/* 🔔 NOTIFICATION */}
+        {/*notif*/}
         <div className="relative cursor-pointer">
 
           <FiBell

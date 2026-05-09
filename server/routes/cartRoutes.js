@@ -6,18 +6,32 @@ const {
   addToCart,
   updateCart,
   removeFromCart,
+  requestStock, // ✅ ADD THIS
 } = require("../controllers/cartController");
 
+// =========================
 // GET CART
+// =========================
 router.get("/:userId", getCart);
 
+// =========================
 // ADD TO CART
+// =========================
 router.post("/add", addToCart);
 
-// ✅ UPDATE QUANTITY
+// =========================
+// UPDATE QUANTITY
+// =========================
 router.put("/update", updateCart);
 
-// ✅ REMOVE ITEM
+// =========================
+// REMOVE ITEM
+// =========================
 router.put("/remove", removeFromCart);
+
+// =========================
+// REQUEST STOCK
+// =========================
+router.post("/request-stock", requestStock);
 
 module.exports = router;

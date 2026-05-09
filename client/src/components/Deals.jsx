@@ -26,40 +26,56 @@ function Deals() {
   }, []);
 
   const scrollLeft = () => {
-    scrollRef.current?.scrollBy({ left: -280, behavior: "smooth" });
+    scrollRef.current?.scrollBy({ left:-280, behavior:"smooth" });
   };
 
   const scrollRight = () => {
-    scrollRef.current?.scrollBy({ left: 280, behavior: "smooth" });
+    scrollRef.current?.scrollBy({ left:280, behavior:"smooth" });
   };
 
   const openBusiness = (product) => {
     if (!product.business) return;
 
     const id =
-      typeof product.business === "object"
+      typeof product.business==="object"
         ? product.business._id
         : product.business;
 
     navigate(`/business/${id}`);
   };
 
-  const addToCart = async (productId) => {
-    try {
-      await fetch("http://localhost:5000/api/cart/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: user._id,
-          productId,
-        }),
-      });
-    } catch (err) {
-      console.error(err);
+  
+  const addToCart=async(productId) => {
+  try {
+    if (!user?._id) {
+      alert("Please login first");
+      return;
     }
-  };
+
+    const res = await fetch("http://localhost:5000/api/cart/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: user._id,
+        productId,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Failed to add to cart");
+      return;
+    }
+
+    alert("Added to cart");
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong");
+  }
+};
 
   const requestStock = async (productId) => {
     try {
@@ -166,7 +182,7 @@ function Deals() {
 
                   {/* SELLER */}
                   <p className="text-[11px] text-gray-500">
-                    {product.seller}
+                     {product.business?.name || "Business"}
                   </p>
 
                   {/* PRICE */}

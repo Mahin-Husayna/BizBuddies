@@ -17,7 +17,7 @@ function LocationMarker({ setCoords }) {
 function LocationPicker({ setCoords }) {
   return (
     <MapContainer
-      center={[23.8103, 90.4125]} // default (Dhaka)
+      center={[23.8103, 90.4125]}
       zoom={13}
       style={{ height: "300px", width: "100%" }}
       className="rounded-xl mt-3"

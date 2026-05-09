@@ -15,7 +15,7 @@ const conversationSchema = new mongoose.Schema(
       default: null,
     },
 
-    // 🔥 LAST MESSAGE (for preview + sorting)
+    
     lastMessage: {
       text: {
         type: String,
@@ -27,7 +27,7 @@ const conversationSchema = new mongoose.Schema(
       },
     },
 
-    // 🔴 UNREAD COUNT (REAL badge logic)
+    
     unreadCount: {
       type: Number,
       default: 0,

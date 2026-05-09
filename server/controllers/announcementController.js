@@ -68,7 +68,7 @@ exports.deleteAnnouncement = async (req, res) => {
       });
     }
 
-    // ✅ ONLY CREATOR OR ADMIN
+    //shudhu creator or addmin
     if (
       announcement.createdBy.toString() !== userId &&
       role !== "admin"

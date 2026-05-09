@@ -19,7 +19,7 @@ function AddProduct() {
 
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // ✅ GET BUSINESS ID FROM NAVIGATION
+  //navbar theke business dekha jabe
   const businessId = location.state?.businessId;
 
   const handleImageChange = (file) => {
@@ -32,7 +32,7 @@ function AddProduct() {
 
     console.log("Business ID:", businessId);
 
-    // 🔥 CRITICAL CHECK
+    // chekcing
     if (!businessId) {
       toast.error("No business found. Please try again.");
       return;
@@ -104,7 +104,7 @@ function AddProduct() {
               required
             />
 
-            {/* ✅ STOCK */}
+            {/*stock show */}
             <input
               type="number"
               placeholder="Stock Quantity"

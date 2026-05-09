@@ -1,8 +1,7 @@
 const Product = require("../models/Product");
 
-// =========================
-// CREATE PRODUCT
-// =========================
+
+//create a product
 exports.createProduct = async (req, res) => {
   try {
     const {
@@ -17,7 +16,7 @@ exports.createProduct = async (req, res) => {
       stock,
     } = req.body;
 
-    // 🔥 CRITICAL FIX
+    
     if (!business || business === "undefined") {
       return res.status(400).json({
         message: "Business ID is required",
@@ -64,9 +63,7 @@ exports.createProduct = async (req, res) => {
   }
 };
 
-// =========================
-// GET ALL PRODUCTS
-// =========================
+//all products
 exports.getProducts = async (req, res) => {
   try {
     const products = await Product.find()
@@ -82,14 +79,12 @@ exports.getProducts = async (req, res) => {
   }
 };
 
-// =========================
-// GET PRODUCTS BY BUSINESS
-// =========================
+//business wise product
 exports.getProductsByBusiness = async (req, res) => {
   try {
     const { businessId } = req.params;
 
-    // 🔥 SAFETY
+
     if (!businessId || businessId === "undefined") {
       return res.status(400).json({
         message: "Invalid businessId",
@@ -109,9 +104,8 @@ exports.getProductsByBusiness = async (req, res) => {
   }
 };
 
-// =========================
-// UPDATE PRODUCT
-// =========================
+
+//update product
 exports.updateProduct = async (req, res) => {
   try {
     const {
@@ -165,9 +159,7 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
-// =========================
-// DELETE PRODUCT
-// =========================
+
 exports.deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;

@@ -3,9 +3,8 @@ const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 const Notification = require("../models/Notification");
 
-// =========================
-// CREATE ORDER / CHECKOUT
-// =========================
+
+//create a order
 exports.createOrder = async (req, res) => {
   try {
     const {
@@ -107,9 +106,7 @@ exports.createOrder = async (req, res) => {
   }
 };
 
-// =========================
-// GET USER ORDERS
-// =========================
+
 exports.getOrders = async (req, res) => {
   try {
     const orders = await Order.find({ user: req.params.userId })
@@ -129,9 +126,7 @@ exports.getOrders = async (req, res) => {
   }
 };
 
-// =========================
-// GET SELLER ORDERS
-// =========================
+
 exports.getSellerOrders = async (req, res) => {
   try {
     const orders = await Order.find({
@@ -148,9 +143,8 @@ exports.getSellerOrders = async (req, res) => {
   }
 };
 
-// =========================
-// UPDATE ORDER STATUS
-// =========================
+
+//status updating
 exports.updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -179,9 +173,7 @@ exports.updateOrderStatus = async (req, res) => {
   }
 };
 
-// =========================
-// 📊 BUSINESS INSIGHTS (🔥 FIX)
-// =========================
+
 exports.getInsights = async (req, res) => {
   try {
     const { businessId } = req.params;

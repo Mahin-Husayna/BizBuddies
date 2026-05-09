@@ -123,7 +123,7 @@ function Search() {
 
           </div>
 
-          {/* 🏪 BUSINESSES */}
+          
           {businesses.length > 0 && (
             <>
               <h2 className="text-lg font-semibold mb-3">Businesses</h2>
@@ -163,7 +163,7 @@ function Search() {
             </>
           )}
 
-          {/* ❌ NO RESULTS */}
+         
           {filteredProducts.length === 0 && businesses.length === 0 && (
             <p className="text-gray-500 mt-6">
               No results found.

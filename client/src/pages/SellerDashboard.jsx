@@ -8,7 +8,7 @@ function SellerDashboard() {
   const user = JSON.parse(localStorage.getItem("user"));
   const business = JSON.parse(localStorage.getItem("business"));
 
-  // 🔥 NEW STATUS FLOW
+  //new status
   const statusFlow = ["pending", "processing", "out_for_delivery", "delivered"];
 
   const statusLabels = {
@@ -18,9 +18,8 @@ function SellerDashboard() {
     delivered: "Delivered",
   };
 
-  // =========================
-  // FETCH ORDERS
-  // =========================
+  
+  //order fetch
   useEffect(() => {
     if (!business?._id) return;
 
@@ -30,13 +29,13 @@ function SellerDashboard() {
       .catch((err) => console.error(err));
   }, [business]);
 
-  // 🔥 GET NEXT STATUS
+  //porer status
   const getNextStatus = (current) => {
     const index = statusFlow.indexOf(current);
     return statusFlow[index + 1] || null;
   };
 
-  // 🔥 UPDATE STATUS
+  //status updating
   const updateStatus = async (orderId, nextStatus) => {
     const res = await fetch(
       `http://localhost:5000/api/orders/status/${orderId}`,
@@ -100,7 +99,7 @@ function SellerDashboard() {
                         <span
                           className={`px-3 py-1 text-xs rounded-full font-medium
                             ${
-                              order.status === "delivered"
+                              order.status=== "delivered"
                                 ? "bg-green-100 text-green-700"
                                 : "bg-yellow-100 text-yellow-700"
                             }`}

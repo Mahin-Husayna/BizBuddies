@@ -69,7 +69,7 @@ function Insights() {
 
           </div>
 
-          {/* FUTURE SECTION (optional placeholder) */}
+          
           <div className="mt-8 bg-white/70 p-6 rounded-xl shadow text-center text-gray-500">
             📈 More analytics coming soon (monthly charts, engagement, etc.)
           </div>

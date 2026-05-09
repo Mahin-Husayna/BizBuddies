@@ -138,9 +138,7 @@ exports.removeFromCart = async (req, res) => {
   }
 };
 
-// =========================
-// STOCK REQUEST (UNCHANGED)
-// =========================
+
 exports.requestStock = async (req, res) => {
   try {
     const { productId, userId } = req.body;

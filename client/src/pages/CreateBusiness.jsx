@@ -69,9 +69,7 @@ function CreateBusiness() {
         <div className="flex-1 bg-white/40 backdrop-blur-xl p-6 rounded-2xl">
           <Navbar user={user} />
 
-          <h1 className="text-2xl font-bold text-purple-700 mb-6">
-            Create Your Business
-          </h1>
+          <h1 className="text-2xl font-bold text-purple-700 mb-6">Create Your Business</h1>
 
           <form
             onSubmit={handleSubmit}
@@ -114,8 +112,7 @@ function CreateBusiness() {
             )}
 
             <button className="bg-purple-500 text-white py-3 rounded-xl">
-              Create Business
-            </button>
+              Create Business </button>
           </form>
         </div>
       </div>

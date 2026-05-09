@@ -4,9 +4,7 @@ function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // =========================
-  // LOGOUT
-  // =========================
+//logout button
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("business");
@@ -14,9 +12,7 @@ function Sidebar() {
     window.location.href = "/";
   };
 
-  // =========================
-  // MENU ITEMS
-  // =========================
+  //sidebar options
   const menuItems = [
     {
       name: "Home",

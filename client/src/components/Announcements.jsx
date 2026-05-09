@@ -5,9 +5,8 @@ function Announcements() {
 
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // =========================
+
   // FETCH ANNOUNCEMENTS
-  // =========================
   useEffect(() => {
     fetch("http://localhost:5000/api/announcements")
       .then((res) => res.json())
@@ -15,9 +14,8 @@ function Announcements() {
       .catch((err) => console.error(err));
   }, []);
 
-  // =========================
+
   // DELETE ANNOUNCEMENT
-  // =========================
   const handleDelete = async (id) => {
     try {
       await fetch(`http://localhost:5000/api/announcements/${id}`, {
@@ -31,7 +29,7 @@ function Announcements() {
         }),
       });
 
-      // update UI instantly
+     
       setAnnouncements((prev) =>
         prev.filter((a) => a._id !== id)
       );
@@ -40,9 +38,9 @@ function Announcements() {
     }
   };
 
-  // =========================
-  // TYPE STYLES
-  // =========================
+ 
+  //STYLES
+
   const getStyle = (type) => {
     switch (type) {
       case "offer":
@@ -71,7 +69,7 @@ function Announcements() {
   return (
     <div className="bg-white/50 backdrop-blur-xl p-4 rounded-2xl shadow-md">
 
-      {/* HEADER */}
+      {/*HEADER */}
       <div className="flex items-center gap-2 mb-4">
         <span className="text-lg">📢</span>
         <h2 className="text-md font-semibold text-purple-700">
@@ -79,7 +77,7 @@ function Announcements() {
         </h2>
       </div>
 
-      {/* LIST */}
+      {/*LIST*/}
       <div className="flex flex-col gap-3 max-h-[260px] overflow-y-auto pr-1">
 
         {announcements.length === 0 ? (
@@ -88,9 +86,9 @@ function Announcements() {
           </p>
         ) : (
           announcements.map((a) => {
-            const style = getStyle(a.type);
+            const style=getStyle(a.type);
 
-            // ✅ FIXED PERMISSION CHECK
+            //PERMISSION CHECK
             const canDelete =
               user &&
               (a.createdBy?.toString() === user._id ||
@@ -102,7 +100,7 @@ function Announcements() {
                 className={`relative group p-3 rounded-xl shadow-sm bg-gradient-to-r ${style.bg} hover:scale-[1.02] transition`}
               >
 
-                {/* ❌ DELETE BUTTON */}
+                {/*DELETE BUTTON*/}
                 {canDelete && (
                   <button
                     onClick={() => handleDelete(a._id)}
@@ -136,7 +134,7 @@ function Announcements() {
                 {/* FOOTER */}
                 <div className="flex justify-between items-center mt-2 text-[11px] text-gray-500">
 
-                  {/* ✅ SHOW BUSINESS NAME */}
+                  {/*SHOW BUSINESS NAME*/}
                   <span>
                     by{" "}
                     {a.role === "admin"

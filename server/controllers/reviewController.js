@@ -2,40 +2,36 @@ const Review = require("../models/Review");
 const Business = require("../models/Business");
 const Order = require("../models/Order");
 
-// =========================
-// ADD REVIEW (ONLY AFTER DELIVERY)
-// =========================
+
 exports.addReview = async (req, res) => {
   try {
     const { userId, orderId, rating, comment } = req.body;
 
-    // 🔒 CHECK ORDER
+    // check order
     const order = await Order.findById(orderId);
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    // 🔒 ONLY IF DELIVERED
+    // shudhu delivery complete hole
     if (order.status !== "delivered") {
       return res.status(400).json({ message: "Order not delivered yet" });
     }
 
-    // 🔒 ONLY OWNER CAN REVIEW
+    // only owner
     if (order.user.toString() !== userId) {
       return res.status(403).json({ message: "Not authorized" });
     }
 
-    // 🔒 PREVENT MULTIPLE REVIEWS
+    //ektar beshi review daya jabena
     const existing = await Review.findOne({ order: orderId });
 
     if (existing) {
       return res.status(400).json({ message: "Already reviewed" });
     }
 
-    // =========================
-    // CREATE REVIEW
-    // =========================
+   //create review
     const review = new Review({
       user: userId,
       business: order.business,
@@ -46,9 +42,7 @@ exports.addReview = async (req, res) => {
 
     await review.save();
 
-    // =========================
-    // UPDATE BUSINESS RATING
-    // =========================
+    //update rating
     const reviews = await Review.find({
       business: order.business,
     });
@@ -69,9 +63,8 @@ exports.addReview = async (req, res) => {
   }
 };
 
-// =========================
-// GET BUSINESS REVIEWS
-// =========================
+
+//get reviews
 exports.getBusinessReviews = async (req, res) => {
   try {
     const reviews = await Review.find({

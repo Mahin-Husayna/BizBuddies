@@ -19,9 +19,7 @@ function Cart() {
 
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // =========================
-  // FETCH CART
-  // =========================
+  //fetch cart option
   useEffect(() => {
     if (!user?._id) return;
 

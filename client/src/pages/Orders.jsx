@@ -6,7 +6,7 @@ import Navbar from "../components/Navbar";
 function Orders() {
   const [orders, setOrders] = useState([]);
 
-  // 🔥 REVIEW STATES
+  
   const [activeReview, setActiveReview] = useState(null);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -33,7 +33,7 @@ function Orders() {
     return statusFlow.indexOf(status);
   };
 
-  // 🔥 SUBMIT REVIEW
+  //submit
   const submitReview = async () => {
     if (!rating) {
       alert("Please select a rating");
@@ -69,7 +69,7 @@ function Orders() {
         <div className="bg-white/60 p-6 rounded-2xl shadow">
           <h1 className="text-2xl font-bold mb-6">My Orders</h1>
 
-          {orders.length === 0 ? (
+          {orders.length=== 0 ? (
             <p>No orders yet</p>
           ) : (
             orders.map((order) => {
@@ -180,8 +180,8 @@ function Orders() {
                     </div>
                   </div>
 
-                  {/* 🔥 REVIEW BUTTON */}
-                  {order.status === "delivered" && (
+                  {/* leave review button*/}
+                  {order.status=== "delivered" && (
                     <button
                       onClick={() => setActiveReview(order)}
                       className="mt-4 bg-purple-500 text-white px-4 py-1 rounded text-sm"
@@ -225,7 +225,7 @@ function Orders() {
         </div>
       </div>
 
-      {/* 🔥 REVIEW MODAL */}
+      {/* review box*/}
       {activeReview && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
           <div className="bg-white p-6 rounded-xl w-80">

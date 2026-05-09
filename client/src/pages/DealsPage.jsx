@@ -24,7 +24,7 @@ function DealsPage() {
             🔥 All  Deals
           </h1>
 
-          {/* 🔥 THIS IS THE IMPORTANT PART */}
+         
           <Deals />
 
         </div>

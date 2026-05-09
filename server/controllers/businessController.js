@@ -2,11 +2,9 @@ const Business = require("../models/Business");
 const Product = require("../models/Product");
 const User = require("../models/User");
 const Notification = require("../models/Notification");
-const Review = require("../models/Review"); // ⭐ NEW
+const Review = require("../models/Review"); 
 
-// =========================
-// CREATE BUSINESS
-// =========================
+//create business
 exports.createBusiness = async (req, res) => {
   try {
     const { name, description, category, owner, ownerName } = req.body;
@@ -43,9 +41,8 @@ exports.createBusiness = async (req, res) => {
   }
 };
 
-// =========================
-// ⭐ HELPER: ADD RATING DATA
-// =========================
+
+//add rating
 const attachRatings = async (businesses) => {
   return Promise.all(
     businesses.map(async (b) => {
@@ -65,16 +62,14 @@ const attachRatings = async (businesses) => {
   );
 };
 
-// =========================
-// PUBLIC: ONLY APPROVED
-// =========================
+//approved hole then public e show korbe
 exports.getAllBusinesses = async (req, res) => {
   try {
     const businesses = await Business.find({
       status: "approved",
     }).sort({ createdAt: -1 });
 
-    const enriched = await attachRatings(businesses); // ⭐ NEW
+    const enriched = await attachRatings(businesses); 
 
     res.json(enriched);
   } catch (err) {
@@ -82,9 +77,7 @@ exports.getAllBusinesses = async (req, res) => {
   }
 };
 
-// =========================
-// USER: GET OWN BUSINESS
-// =========================
+//nijer business
 exports.getBusinessByUser = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -101,16 +94,14 @@ exports.getBusinessByUser = async (req, res) => {
 
     const enriched = await attachRatings([business]);
 
-    res.json(enriched[0]); // ⭐ NEW
+    res.json(enriched[0]); 
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error fetching business" });
   }
 };
 
-// =========================
-// GET SINGLE BUSINESS
-// =========================
+//ekta business 
 exports.getBusinessById = async (req, res) => {
   try {
     const business = await Business.findById(req.params.id);
@@ -119,8 +110,7 @@ exports.getBusinessById = async (req, res) => {
       return res.status(404).json({ message: "Business not found" });
     }
 
-    const enriched = await attachRatings([business]); // ⭐ NEW
-
+    const enriched = await attachRatings([business]);
     res.json(enriched[0]);
   } catch (error) {
     res.status(500).json({ message: "Error fetching business" });
@@ -173,9 +163,7 @@ exports.getAdminStats = async (req, res) => {
   }
 };
 
-// =========================
-// 🔔 REALTIME HELPER
-// =========================
+
 const sendRealtimeNotification = (req, userId, message) => {
   const io = req.app.get("io");
   const users = req.app.get("users");
@@ -189,9 +177,8 @@ const sendRealtimeNotification = (req, userId, message) => {
   }
 };
 
-// =========================
-// ADMIN: APPROVE
-// =========================
+
+//admin approval
 exports.approveBusiness = async (req, res) => {
   try {
     const business = await Business.findByIdAndUpdate(
@@ -243,9 +230,7 @@ exports.rejectBusiness = async (req, res) => {
   }
 };
 
-// =========================
-// ADMIN: BAN
-// =========================
+
 exports.banBusiness = async (req, res) => {
   try {
     const business = await Business.findByIdAndUpdate(
@@ -270,9 +255,7 @@ exports.banBusiness = async (req, res) => {
   }
 };
 
-// =========================
-// DELETE BUSINESS
-// =========================
+
 exports.deleteBusiness = async (req, res) => {
   try {
     const { id } = req.params;
@@ -286,9 +269,8 @@ exports.deleteBusiness = async (req, res) => {
   }
 };
 
-// =========================
-// 🏆 LEADERBOARD (UPDATED)
-// =========================
+
+//leadderboard
 exports.getLeaderboard = async (req, res) => {
   try {
     const businesses = await Business.find({

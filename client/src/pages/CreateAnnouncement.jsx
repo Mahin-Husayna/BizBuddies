@@ -13,25 +13,21 @@ function CreateAnnouncement() {
 
   const navigate = useNavigate();
 
-  // =========================
-  // 🔒 PERMISSION CHECK (FIXED)
-  // =========================
+  //permission check
   useEffect(() => {
     if (!user) {
       navigate("/");
       return;
     }
 
-    // ✅ Allow: admin OR user with business
+    //  admin OR user with business
     if (user.role !== "admin" && !business?._id) {
       alert("You must create a business to post announcements");
       navigate("/home");
     }
   }, [user, business, navigate]);
 
-  // =========================
-  // SUBMIT
-  // =========================
+  //submit button
   const handleSubmit = async () => {
     if (!title.trim() || !message.trim()) {
       alert("Please fill all fields");
@@ -50,7 +46,7 @@ function CreateAnnouncement() {
           type,
           createdBy: user?._id,
 
-          // ✅ FIXED ROLE (VERY IMPORTANT)
+          
           role: user?.role === "admin" ? "admin" : "seller",
 
           business: business?._id || null,
